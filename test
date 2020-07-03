@@ -1,0 +1,47 @@
+#!/bin/bash
+# Test typical usage for the evry program
+
+cargo build || exit $?
+evry='./target/debug/evry'
+
+TAG_FILE="${XDG_DATA_HOME:-$HOME/.local/share}/evry/data/evrytest"
+ROLLBACK_FILE="${XDG_DATA_HOME:-$HOME/.local/share}/evry/rollback"
+
+rm "$TAG_FILE"
+rm "$ROLLBACK_FILE"
+
+# test non-existent file
+"$evry" 5 seconds -evrytest
+(($? == 0)) && echo '.' || echo "FAIL, exit code ${?} from non existing tag file"
+
+# test existing file within duration
+"$evry" 5 seconds -evrytest
+(($? == 0)) && echo "FAIL: call within duration caused zero exit code" || echo '.'
+
+# sleep to elapse duration
+sleep 5
+
+# test existing file when duration has elapsed
+"$evry" 5 seconds -evrytest
+(($? == 0)) && echo '.' || echo "FAIL: after duration has elapsed, failed with non zero exit code"
+
+sleep 5
+# test the typical usage, with a rollback it it fails
+# in this case, the command fails
+
+"$evry" 5 seconds -evrytest && {
+	# since it succeeded, the rollback file should have been updated
+	ROLLBACK_CONTENTS="$(cat "$ROLLBACK_FILE")"
+	# print out what the tag file currently is, so it can be compared after rollback
+	TAG_NEW_CONTENTS="$(cat "$TAG_FILE")"
+	printf "The new tag file had contents: %d\n" "$TAG_NEW_CONTENTS"
+	# run the command, since it 'fails', run rollback, and make sure the evrytest data file has rollback contents now
+	false || "$evry" rollback -evrytest
+	TAG_CONTENTS="$(cat "$TAG_FILE")"
+	if [[ "$TAG_CONTENTS" == "$ROLLBACK_CONTENTS" ]]; then
+		printf "Rollback succeeded\n"
+		echo "$(head -n 1 "$TAG_FILE" "$ROLLBACK_FILE")"
+	else
+		printf "Expected the contents of the TAG_FILE to be %d - found %d\n" "$ROLLBACK_CONTENTS" "$TAG_CONTENTS"
+	fi
+}
