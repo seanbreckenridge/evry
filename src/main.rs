@@ -21,7 +21,42 @@ impl CLI {
         if warn {
             println!("Not enough arguments provided.");
         }
-        println!("put help here");
+        println!(
+            "A tool to manually run commands -- periodically.
+Uses shell exit codes to determine control flow
+
+Usage:
+  evry [describe duration]... <-tagname>
+  evry rollback <-tagname>
+  evry help
+
+Best explained with an example:
+
+evry 2 weeks -scrapesite && wget \"https://\" -o ....
+
+In other words, if evry exits with a zero exit code (success),
+run the wget command.
+
+evry exits with an unsuccessful exit code
+if the command has been run in the last <duration>
+
+This saves files to XDG_DATA_HOME/evry/data that keep
+track of when some tag (e.g. -scrapesite) was last run
+
+Since this has no clue what the external command is,
+and whether it succeeds or not, this saves a history
+of one operation, so you can rollback when a tag was
+last run, incase of failure. An example:
+
+evry 2 months -selenium && {{
+    python selenium.py || {{
+        evry rollback -selenium
+    }}
+}}
+
+See https://github.com/seanbreckenridge/evry for more examples.
+"
+        );
         exit(2)
     }
 
@@ -37,7 +72,7 @@ impl CLI {
         let (tag_vec, other_vec): (_, Vec<_>) =
             args.into_iter().partition(|arg| arg.starts_with('-'));
         // user didn't provide argument
-        if tag_vec.is_empty() {
+        if tag_vec.is_empty() || other_vec.is_empty() {
             CLI::help(true)
         }
         // parse tag, remove the '-' from the name
