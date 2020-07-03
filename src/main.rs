@@ -129,7 +129,7 @@ fn main() {
         if epoch_now - last_ran_at > run_every {
             // duration this should be run at has elapsed, run
             if cli.debug {
-                println!("Has been more than {:?} milliseconds, saving to rollback file and writing to tag file", run_every)
+                println!("Has been more than {} milliseconds, saving to rollback file and writing to tag file", run_every)
             }
             // dump this to rollback file so it can this can be rolled back if external command fails
             app_path::save_rollback(&dir_info, last_ran_at);
