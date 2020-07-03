@@ -5,6 +5,7 @@ A tool to *manually* run commands -- periodically.
 * Documentation
 * Fix Help Message
 
+```
 evry 2 months -selenium && {
 # evry succeeded, so the external command should be run
     python selenium.py || {
@@ -14,5 +15,6 @@ evry 2 months -selenium && {
         evry rollback -selenium
     }
 }
+```
 
 Note: durations are additive, multiple 5m will be added together
