@@ -1,0 +1,27 @@
+// numbers, allow '_' to make long numbers readable
+number = { (ASCII_DIGIT | "_")+ }
+
+// different possible singular time units
+year = { "yr" | "year" }
+month = { "month" }
+week = { "weeks" | "wk" }
+day = { "day" | "d" }
+hour = { "hour" | "hr" }
+minute = { "minute" | "min" }
+second = { "second" | "sec" }
+
+// one time unit (singular)
+singular = { (day | hour | minute | week | month | second | year) }
+// @ means atomic rule, doesnt apply WHITESPACE
+plural = @{ (day | hour | minute | week | month | second | year) ~ "s" }
+
+// one duration
+duration = { number ~ (plural | singular) }
+// one or more durations
+durations = { duration ~ ((",")? ~ duration)* }
+
+// entire grammar
+file = { SOI ~ (durations) ~ EOI }
+
+// implicitly chomp whitespace between '~'
+WHITESPACE = _{ " " }

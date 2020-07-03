@@ -1,8 +1,12 @@
 use std::env;
 use std::process::exit;
-// use std::time::SystemTime;
+
+extern crate pest;
+#[macro_use]
+extern crate pest_derive;
 
 mod app_path;
+mod parser;
 
 #[derive(Debug)]
 pub struct CLI {
@@ -72,7 +76,11 @@ fn main() {
     }
 
     // parse duration string
-    let run_every = 5000;
+    let run_every = parser::parse_time(cli.args, cli.debug);
+
+    if cli.debug {
+        println!("Parsed input date string into {} milliseconds", run_every);
+    }
 
     if !cli.tag.file_exists() {
         // file doesn't exist, this is the first time this tag is being run.

@@ -6,6 +6,8 @@ use std::{
     path::{Path, PathBuf},
 };
 
+// File-related functionality
+
 const APP_INFO: AppInfo = AppInfo {
     name: "evry",
     author: "seanbreckenridge",

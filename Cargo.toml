@@ -8,3 +8,5 @@ edition = "2018"
 
 [dependencies]
 app_dirs = "^1.2.1"
+pest = "2.0"
+pest_derive = "2.0"
