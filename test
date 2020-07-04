@@ -4,6 +4,8 @@
 cargo build || exit $?
 evry='./target/debug/evry'
 
+export EVRY_DEBUG=1
+
 TAG_FILE="${XDG_DATA_HOME:-$HOME/.local/share}/evry/data/evrytest"
 ROLLBACK_FILE="${XDG_DATA_HOME:-$HOME/.local/share}/evry/rollback"
 
