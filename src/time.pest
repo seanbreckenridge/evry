@@ -5,7 +5,7 @@ number = { (ASCII_DIGIT | "_")+ }
 year = { "yr" | "year" }
 month = { "month" }
 week = { "weeks" | "wk" }
-day = { "day" | "d" }
+day = { "day" | "dy" | "d" }
 hour = { "hour" | "hr" }
 minute = { "minute" | "min" }
 second = { "second" | "sec" }
@@ -13,7 +13,7 @@ second = { "second" | "sec" }
 // one time unit (singular)
 singular = { (day | hour | minute | week | month | second | year) }
 // @ means atomic rule, doesnt apply WHITESPACE
-plural = @{ (day | hour | minute | week | month | second | year) ~ "s" }
+plural = @{ singular ~ "s" }
 
 // one duration
 duration = { number ~ (plural | singular) }
