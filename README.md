@@ -14,10 +14,12 @@ cargo install --git https://gitlab.com/seanbreckenridge/evry
 
 Uses shell exit codes to determine control flow in shell scripts.
 
+```
 Usage:
   evry [describe duration]... <-tagname>
   evry rollback <-tagname>
   evry help
+```
 
 Best explained with an example:
 
@@ -49,12 +51,14 @@ You could have an infinite loop running in the background like:
 
 ```
 while true; do
-  evry 1 month && run command
+  evry 1 month -runcommand && run command
   sleep 60
 done
 ```
 
 ... and even though that tries to run the command every 60 seconds, `evry` exits with an unsuccessful exit code, so `run command` would only get run once per month.
+
+The `-runcommand` is just an arbitrary tag name so that `evry` can save metadata about a command to run/job. Can be chosen arbitrarily, its only use is to uniquely identify runs of `evry`, and save a metadata file to `XDG_DATA_HOME/evry/data`.
 
 I have certain jobs (e.g. scraping websites for metadata, using [selenium](https://www.selenium.dev/) to login to some website and click a button, updating specific packages (e.g. `brew cask upgrade --greedy` on mac)) that I want to run periodically, but they have the chance to fail - so putting them in some script I run every so often is preferable to cron.
 
