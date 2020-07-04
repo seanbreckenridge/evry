@@ -27,7 +27,7 @@ Best explained with an example:
 
 In other words, if `evry` exits with a zero exit code (success), run the wget command.
 
-`evry` exits with an unsuccessful exit code if the command has been run in the last <duration>
+`evry` exits with an unsuccessful exit code if the command has been run in the last `2 weeks` (see below for more duration examples)
 
 When `evry` exits with a successful exit code, it saves when it ran to a metadata file to `XDG_DATA_HOME/evry/data` that keep track of when some tag (e.g. -scrapesite) was last run
 
