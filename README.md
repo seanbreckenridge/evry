@@ -71,3 +71,6 @@ The duration (e.g. `evry 2 months, 5 days`) is parsed with a [`PEG`](https://en.
 * `5weeks, 2weeks` (is additive, so this would result in 7 weeks)
 * `60sec 2weeks` (order doesn't matter)
 
+The `EVRY_DEBUG` environment variable can be set to provide information on what was parsed from user input:
+
+`EVRY_DEBUG=1 evry 3 months, 5 days -sometag`
