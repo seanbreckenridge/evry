@@ -111,6 +111,9 @@ fn main() {
     if !cli.tag.file_exists() {
         // file doesn't exist, this is the first time this tag is being run.
         // save the current milliseconds to the file and exit with a 0 exit code
+        if cli.debug {
+            println!("Tag file doesn't exist, creating and exiting successfully.")
+        }
         cli.tag.write_epoch_millis();
         exit(0)
     } else {
@@ -129,6 +132,9 @@ fn main() {
             exit(0)
         } else {
             // this has been run within the specified duration, don't run
+            if cli.debug {
+                println!("Hasn't been more than {} milliseconds since last run according to tag file, failing (exit code 1)", run_every)
+            }
             exit(1)
         }
     }
