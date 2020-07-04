@@ -25,13 +25,13 @@ Best explained with an example:
 
 `evry 2 weeks -scrapesite && wget "https://" -o ....`
 
-In other words, if `evry` exits runs successfully, run the `wget` command.
+In other words, run the `wget` command every `2 weeks`.
 
-`evry` exits with an unsuccessful exit code if the command has been run in the last `2 weeks` (see below for more duration examples)
+`evry` exits with an unsuccessful exit code if the command has been run in the last `2 weeks` (see below for more duration examples), which means the `wget` command wouldn't run.
 
-When `evry` exits with a successful exit code, it saves the current time to a metadata file for that tag (`-scrapsite`). That way, when `evry` is run again, it can compare the current time against that file.
+When `evry` exits with a successful exit code, it saves the current time to a metadata file for that tag (`-scrapesite`). That way, when `evry` is run again with that tag, it can compare the current time against that file.
 
-Since this has no clue what the external command is, and whether it succeeds or not, this saves a history of one operation, so you can rollback when a tag was last run, incase of failure. An example:
+Since this has no clue what the external command is, and whether it succeeds or not, this saves a history of one operation, so you can rollback when a tag was last run, in case of failure. An example:
 
 ```
 evry 2 months -selenium && {

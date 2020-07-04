@@ -23,38 +23,29 @@ impl CLI {
         }
         println!(
             "A tool to manually run commands -- periodically.
-Uses shell exit codes to determine control flow
+Uses shell exit codes to determine control flow in shell scripts
 
 Usage:
   evry [describe duration]... <-tagname>
   evry rollback <-tagname>
   evry help
 
+
 Best explained with an example:
 
 evry 2 weeks -scrapesite && wget \"https://\" -o ....
 
-In other words, if evry exits with a zero exit code (success),
-run the wget command.
+In other words, run the wget command every 2 weeks.
 
-evry exits with an unsuccessful exit code
-if the command has been run in the last <duration>
+evry exits with an unsuccessful exit code if the command has
+been run in the last 2 weeks, which means the wget command wouldn't run.
 
-This saves files to XDG_DATA_HOME/evry/data that keep
-track of when some tag (e.g. -scrapesite) was last run
+When evry exits with a successful exit code, it saves the current time
+to a metadata file for that tag (-scrapesite). That way, when evry
+is run again with that tag, it can compare the current time against that file.
 
-Since this has no clue what the external command is,
-and whether it succeeds or not, this saves a history
-of one operation, so you can rollback when a tag was
-last run, incase of failure. An example:
-
-evry 2 months -selenium && {{
-    python selenium.py || {{
-        evry rollback -selenium
-    }}
-}}
-
-See https://github.com/seanbreckenridge/evry for more examples.
+rollback is used incase the command failed to run, see
+https://github.com/seanbreckenridge/evry for more examples.
 "
         );
         exit(2)
