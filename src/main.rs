@@ -45,8 +45,7 @@ to a metadata file for that tag (-scrapesite). That way, when evry
 is run again with that tag, it can compare the current time against that file.
 
 rollback is used incase the command failed to run, see
-https://github.com/seanbreckenridge/evry for more examples.
-"
+https://github.com/seanbreckenridge/evry for more examples."
         );
         exit(2)
     }
