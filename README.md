@@ -80,6 +80,6 @@ The `EVRY_DEBUG` environment variable can be set to provide information on what 
 
 I have certain jobs (e.g. scraping websites for metadata, using [selenium](https://www.selenium.dev/) to [login to some website and click a button](https://github.com/seanbreckenridge/pythonanywhere-3-months), updating specific packages (e.g. [running `brew cask upgrade --greedy` on mac](https://github.com/seanbreckenridge/dotfiles/blob/e11aea908ec4f2dd111143ebfe5d6a4eb07e268c/.config/zsh/functions/update#L11))) that I want to run periodically.
 
-Putting all my jobs I want to run periodically in one 'housekeeping' script I run daily/weekly gives me the ability to monitor the output easily, but also allows me the flexibility of being able to schedule tasks to run at different rates.
+Putting all my jobs I want to run periodically in one '[housekeeping](https://sean.fish/d/housekeeping?dark)' script I run daily/weekly gives me the ability to monitor the output easily, but also allows me the flexibility of being able to schedule tasks to run at different rates.
 
- [anacron](https://linux.die.net/man/8/anacron) tries to solve a similar problem, and I use both `cron` and `anacron` for different uses. I prefer `evry`s way of describing the duration, and `anacron` is typically run with a `systemd` timer anyways. `evry` is *not meant* to be run as a daemon, its specifically for tasks I want to monitor manually.
+ [anacron](https://linux.die.net/man/8/anacron) tries to solve a similar problem, and I use both `cron` and `anacron` for different uses. I prefer `evry`s way of describing the duration, and `anacron` is typically run with a `systemd` timer anyways.
