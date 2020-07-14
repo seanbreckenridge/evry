@@ -117,10 +117,9 @@ fn main() {
         cli.tag.write_epoch_millis();
         exit(0)
     } else {
-        let epoch_now = app_path::epoch_time();
         // file exists, read last time this tag was run
         let last_ran_at = cli.tag.read_epoch_millis();
-        if epoch_now - last_ran_at > run_every {
+        if app_path::epoch_time() - last_ran_at > run_every {
             // duration this should be run at has elapsed, run
             if cli.debug {
                 println!("Has been more than {} milliseconds, saving to rollback file and writing to tag file", run_every)
