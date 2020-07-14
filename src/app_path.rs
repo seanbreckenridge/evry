@@ -79,8 +79,8 @@ pub fn restore_rollback(local_dir: &LocalDir, tag: &Tag) {
 /// A 'tag' is the name of some evry task, used to differentiate
 /// different tasks/runs of evry from each other
 /// e.g.
-/// evry 2 months "some tool" && run tool
-/// evry 10 minutes "request file" && wget ...
+/// evry 2 months -sometool && run tool
+/// evry 10 minutes -requestfile && wget ...
 #[derive(Debug)]
 pub struct Tag {
     pub name: String,
