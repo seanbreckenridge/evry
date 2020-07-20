@@ -82,4 +82,5 @@ I have certain jobs (e.g. scraping websites for metadata, using [selenium](https
 
 Putting all my jobs I want to run periodically in one '[housekeeping](https://sean.fish/d/housekeeping?dark)' script I run daily/weekly gives me the ability to monitor the output easily, but also allows me the flexibility of being able to schedule tasks to run at different rates.
 
- [anacron](https://linux.die.net/man/8/anacron) tries to solve a similar problem, and I use both `cron` and `anacron` for different uses. I prefer `evry`s way of describing the duration, and `anacron` is typically run with a `systemd` timer anyways.
+I also have a [background loop script](https://github.com/seanbreckenridge/bgproc) that uses this to run tasks periodically, which I prefer to cron on my main machine.
+
