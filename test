@@ -47,3 +47,4 @@ sleep 5
 		printf "Expected the contents of the TAG_FILE to be %d - found %d\n" "$ROLLBACK_CONTENTS" "$TAG_CONTENTS"
 	fi
 }
+rm "$TAG_FILE"
