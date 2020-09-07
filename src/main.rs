@@ -5,15 +5,16 @@ extern crate pest;
 #[macro_use]
 extern crate pest_derive;
 
-mod app_path;
+mod file;
 mod parser;
+mod utils;
 
 #[derive(Debug)]
 pub struct CLI {
     args: Vec<String>,
     debug: bool,
     rollback: bool,
-    tag: app_path::Tag,
+    tag: file::Tag,
 }
 
 impl CLI {
@@ -50,7 +51,7 @@ https://github.com/seanbreckenridge/evry for more examples."
         exit(2)
     }
 
-    pub fn parse_args(dir_info: &app_path::LocalDir) -> Self {
+    pub fn parse_args(dir_info: &file::LocalDir) -> Self {
         // get arguments (remove binary name)
         let args: Vec<String> = env::args().skip(1).collect();
         let args_len = args.len();
@@ -78,14 +79,14 @@ https://github.com/seanbreckenridge/evry for more examples."
             args: other_vec,
             debug: env::var("EVRY_DEBUG").is_ok(),
             rollback,
-            tag: app_path::Tag::new(tag.to_string(), dir_info),
+            tag: file::Tag::new(tag.to_string(), dir_info),
         }
     }
 }
 
 fn main() {
     // global application information
-    let dir_info = app_path::LocalDir::new();
+    let dir_info = file::LocalDir::new();
     let cli = CLI::parse_args(&dir_info);
     if cli.debug {
         println!("{}:Config:Data Directory: {:?}", cli.tag.name, dir_info.root_dir);
@@ -96,12 +97,15 @@ fn main() {
         if cli.debug {
             println!("{}:Running rollback...", cli.tag.name);
         }
-        app_path::restore_rollback(&dir_info, &cli.tag);
+        file::restore_rollback(&dir_info, &cli.tag);
         exit(0)
     }
 
     // parse duration string
     let run_every = parser::parse_time(cli.args);
+
+    // get current time
+    let now = utils::epoch_time();
 
     if cli.debug {
         println!(
@@ -119,12 +123,12 @@ fn main() {
                 cli.tag.name
             )
         }
-        cli.tag.write_epoch_millis();
+        cli.tag.write(now);
         exit(0)
     } else {
         // file exists, read last time this tag was run
         let last_ran_at = cli.tag.read_epoch_millis();
-        if app_path::epoch_time() - last_ran_at > run_every {
+        if now - last_ran_at > run_every {
             // duration this should be run at has elapsed, run
             if cli.debug {
                 println!(
@@ -132,9 +136,9 @@ fn main() {
                     cli.tag.name, run_every)
             }
             // dump this to rollback file so it can this can be rolled back if external command fails
-            app_path::save_rollback(&dir_info, last_ran_at);
+            file::save_rollback(&dir_info, last_ran_at);
             // save current time to tag file
-            cli.tag.write_epoch_millis();
+            cli.tag.write(now);
             exit(0)
         } else {
             // this has been run within the specified duration, don't run
@@ -146,7 +150,7 @@ fn main() {
                 println!(
                     "{}:Will next be able to run in '{}' milliseconds",
                     cli.tag.name,
-                    last_ran_at + run_every - app_path::epoch_time()
+                    last_ran_at + run_every - now
                 );
             }
             exit(1)

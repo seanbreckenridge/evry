@@ -1,5 +1,4 @@
 use app_dirs::{self, AppDataType, AppInfo};
-use std::time::SystemTime;
 use std::{
     fs::{create_dir_all, read_to_string, File},
     io::{BufWriter, Write},
@@ -29,14 +28,7 @@ impl LocalDir {
     }
 }
 
-pub fn epoch_time() -> u128 {
-    let now = SystemTime::now()
-        .duration_since(SystemTime::UNIX_EPOCH)
-        .expect("error getting unix timestamp");
-    now.as_millis()
-}
-
-// read epoch time from the tag file
+/// read epoch time from a tag file
 pub fn read_epoch_millis(filepath: &str) -> u128 {
     let millis_str = read_to_string(filepath).expect("Could not read tag information from file");
     millis_str
@@ -44,13 +36,7 @@ pub fn read_epoch_millis(filepath: &str) -> u128 {
         .expect("Could not convert tag file information to integer")
 }
 
-/// writes the current epoch time to the tag file
-pub fn write_epoch_millis(filepath: &str) {
-    let fp = File::create(filepath).expect("Could not create tag file");
-    let mut writer = BufWriter::new(&fp);
-    write!(&mut writer, "{}", epoch_time()).expect("Could not write to file")
-}
-
+/// read string from rollback file
 fn rollback_file(local_dir: &LocalDir) -> String {
     let mut local_filepath = local_dir.root_dir.clone();
     local_filepath.push("rollback");
@@ -104,7 +90,9 @@ impl Tag {
         read_epoch_millis(&self.path)
     }
 
-    pub fn write_epoch_millis(&self) {
-        write_epoch_millis(&self.path)
+    pub fn write(&self, time: u128) {
+        let fp = File::create(&self.path).expect("Could not create tag file");
+        let mut writer = BufWriter::new(&fp);
+        write!(&mut writer, "{}", time).expect("Could not write to file")
     }
 }
