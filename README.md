@@ -7,7 +7,7 @@ A shell-script-centric task scheduler; uses exit codes to determine control flow
 Install `rust`/`cargo`, then:
 
 ```
-cargo install --git https://gitlab.com/seanbreckenridge/evry
+cargo install evry
 ```
 
 ## Rationale
