@@ -75,7 +75,7 @@ The `EVRY_DEBUG` environment variable can be set to provide information on what 
 
 `EVRY_DEBUG=1 evry 3 months, 5 days -sometag`
 
-For example output, see [here](https://gist.github.com/seanbreckenridge/10fd5eda7042228174d2447fc26d42fa)
+For example output, see [here](https://gist.github.com/seanbreckenridge/10fd5eda7042228174d2447fc26d42fa).
 
 ### How I use this
 

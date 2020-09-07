@@ -15,9 +15,8 @@ const MINUTE_MILLIS: u128 = 60000;
 const SECOND_MILLIS: u128 = 1000;
 
 /// uses macros to parse the pest.rs grammar into a duration
-pub fn parse_time(user_input: Vec<String>) -> u128 {
-    let unparsed_input = user_input.join(" ");
-    let mut parsed_file = match TimeParser::parse(Rule::file, &unparsed_input) {
+pub fn parse_time(unparsed_input: &str) -> u128 {
+    let mut parsed_file = match TimeParser::parse(Rule::file, unparsed_input) {
         Ok(file) => file,
         Err(error) => {
             eprintln!(

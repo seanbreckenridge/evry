@@ -11,7 +11,7 @@ mod utils;
 
 #[derive(Debug)]
 pub struct CLI {
-    args: Vec<String>,
+    raw_date: String,
     debug: bool,
     rollback: bool,
     tag: file::Tag,
@@ -76,7 +76,7 @@ https://github.com/seanbreckenridge/evry for more examples."
         // if asked to rollback
         let rollback = &other_vec[0] == "rollback";
         CLI {
-            args: other_vec,
+            raw_date: other_vec.join(" "),
             debug: env::var("EVRY_DEBUG").is_ok(),
             rollback,
             tag: file::Tag::new(tag.to_string(), dir_info),
@@ -88,9 +88,15 @@ fn main() {
     // global application information
     let dir_info = file::LocalDir::new();
     let cli = CLI::parse_args(&dir_info);
+
     if cli.debug {
-        println!("{}:Config:Data Directory: {:?}", cli.tag.name, dir_info.root_dir);
-        println!("{}:Config:Date String: '{}'", cli.tag.name, cli.args.join(" "));
+        let mut d = dir_info.root_dir.clone();
+        d.push("data");
+        println!(
+            "{}:data directory: {}",
+            cli.tag.name,
+            d.into_os_string().into_string().unwrap()
+        );
     }
 
     if cli.rollback {
@@ -102,15 +108,15 @@ fn main() {
     }
 
     // parse duration string
-    let run_every = parser::parse_time(cli.args);
+    let run_every = parser::parse_time(&cli.raw_date);
 
     // get current time
     let now = utils::epoch_time();
 
     if cli.debug {
         println!(
-            "{}:Parsed input date string into '{}' milliseconds",
-            cli.tag.name, run_every
+            "{}:Parsed '{}' into {}ms",
+            cli.tag.name, cli.raw_date, run_every
         );
     }
 
@@ -119,7 +125,7 @@ fn main() {
         // save the current milliseconds to the file and exit with a 0 exit code
         if cli.debug {
             println!(
-                "{}:Tag file doesn't exist, creating and exiting successfully.",
+                "{}:Tag file doesn't exist, creating and exiting with code 0",
                 cli.tag.name
             )
         }
@@ -132,8 +138,8 @@ fn main() {
             // duration this should be run at has elapsed, run
             if cli.debug {
                 println!(
-                    "{}:Has been more than '{}' milliseconds since last succeeded, writing to tag file'",
-                    cli.tag.name, run_every)
+                    "{}:Has been more than '{}' ({}ms) since last succeeded, writing to tag file, exiting with code 0",
+                    cli.tag.name, utils::describe_ms(run_every), run_every)
             }
             // dump this to rollback file so it can this can be rolled back if external command fails
             file::save_rollback(&dir_info, last_ran_at);
@@ -144,13 +150,17 @@ fn main() {
             // this has been run within the specified duration, don't run
             if cli.debug {
                 println!(
-                    "{}:'{}' milliseconds haven't elapsed since last run, exiting with code 1",
-                    cli.tag.name, run_every
-                );
-                println!(
-                    "{}:Will next be able to run in '{}' milliseconds",
+                    "{}:'{}' ({}ms) hasn't elapsed since last run, exiting with code 1",
                     cli.tag.name,
-                    last_ran_at + run_every - now
+                    utils::describe_ms(run_every),
+                    run_every
+                );
+                let till_next_run = last_ran_at + run_every - now;
+                println!(
+                    "{}:Will next be able to run in '{}' ({}ms)",
+                    cli.tag.name,
+                    utils::describe_ms(till_next_run),
+                    till_next_run
                 );
             }
             exit(1)
