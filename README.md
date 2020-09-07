@@ -82,5 +82,7 @@ I have certain jobs (e.g. scraping websites for metadata, using [selenium](https
 
 Putting all my jobs I want to run periodically in one [housekeeping](https://sean.fish/d/housekeeping?dark) script I run daily/weekly gives me the ability to monitor the output easily, but also allows me the flexibility of being able to schedule tasks to run at different rates.
 
+This also means that all my 'cron-like' jobs are just bash scripts, and can be checked into version control easily.
+
 I also have a [background loop script](https://github.com/seanbreckenridge/bgproc) that uses this to run tasks periodically, which I prefer to cron on my main machine.
 
