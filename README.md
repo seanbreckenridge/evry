@@ -81,7 +81,7 @@ For example output, see [here](https://gist.github.com/seanbreckenridge/10fd5eda
 
 I have certain jobs (e.g. scraping websites for metadata, using [selenium](https://www.selenium.dev/) to [login to some website and click a button](https://github.com/seanbreckenridge/pythonanywhere-3-months), updating specific packages (e.g. [running `brew cask upgrade --greedy` on mac](https://github.com/seanbreckenridge/dotfiles/blob/e11aea908ec4f2dd111143ebfe5d6a4eb07e268c/.config/zsh/functions/update#L11))) that I want to run periodically.
 
-Putting all my jobs I want to run periodically in one [housekeeping](https://sean.fish/d/housekeeping?dark) script I run daily/weekly gives me the ability to monitor the output easily, but also allows me the flexibility of being able to schedule tasks to run at different rates.
+Putting all my jobs I want to run periodically in one [housekeeping](https://sean.fish/d/housekeeping?dark) script I run daily/weekly gives me the ability to monitor the output easily, but also allows me the flexibility of being able to schedule tasks to run at different rates. It also means that those scripts/commands can prompt me for input/confirmation, since this is run manually from a terminal, not in the background like cron.
 
 This also means that all my 'cron-like' jobs are just bash scripts, and can be checked into version control easily.
 
