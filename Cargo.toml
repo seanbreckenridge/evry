@@ -1,6 +1,6 @@
 [package]
 name = "evry"
-version = "0.1.4"
+version = "0.1.5"
 authors = ["Sean Breckenridge <seanbrecke@gmail.com>"]
 edition = "2018"
 description = "A shell-script-centric task scheduler; uses exit codes to determine control flow"
@@ -8,7 +8,7 @@ documentation = "https://docs.rs/evry"
 readme = "README.md"
 homepage = "https://github.com/seanbreckenridge/evry"
 repository = "https://github.com/seanbreckenridge/evry"
-license = "MIT"
+license = "Apache-2.0"
 keywords = ["scheduler", "cron", "anacron"]
 categories = ["command-line-interface", "date-and-time", "filesystem", "parser-implementations"]
 exclude = ["test"]
