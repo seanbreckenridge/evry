@@ -73,9 +73,14 @@ The duration (e.g. `evry 2 months, 5 days`) is parsed with a [`PEG`](https://en.
 
 The `EVRY_DEBUG` environment variable can be set to provide information on what was parsed from user input, and how long till the next run succeeds.
 
-`EVRY_DEBUG=1 evry 3 months, 5 days -sometag`
+`EVRY_DEBUG=1 evry 2 months -pythonanywhere && pythonanywhere_3_months -Hc "$(which chromedriver)"`
 
-For example output, see [here](https://gist.github.com/seanbreckenridge/10fd5eda7042228174d2447fc26d42fa).
+```
+pythonanywhere:data directory: /home/sean/.local/share/evry/data
+pythonanywhere:Parsed '2 months' into 5184000000ms
+pythonanywhere:'60 days' (5184000000ms) hasn't elapsed since last run, exiting with code 1
+pythonanywhere:Will next be able to run in '55 days, 13 hours, 56 minutes, 18 seconds' (4802178196ms)
+```
 
 ### How I use this
 
