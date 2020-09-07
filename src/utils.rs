@@ -1,5 +1,7 @@
+//! helper functions to deal with/describe time
 use std::time::SystemTime;
 
+/// gets the current time as milliseconds
 pub fn epoch_millis() -> u128 {
     SystemTime::now()
         .duration_since(SystemTime::UNIX_EPOCH)
@@ -7,7 +9,8 @@ pub fn epoch_millis() -> u128 {
         .as_millis()
 }
 
-// if the value (time) is not 0, append to the string buffer
+// helper method; if the value (time) is not 0, append to the string buffer
+#[doc(hidden)]
 fn push_if_not_none(parts: &mut Vec<String>, time: u128, description: &str) {
     if time != 0 {
         parts.push(format!("{} {}", time, description));
@@ -15,7 +18,11 @@ fn push_if_not_none(parts: &mut Vec<String>, time: u128, description: &str) {
 }
 
 /// convert milliseconds to human readable time,
-/// for debug output
+/// used for debug output
+///
+/// Example:
+///
+/// Converts 4799805877 (time in milliseconds) to '55 days, 13 hours, 16 minutes, 45 seconds'
 pub fn describe_ms(ms: u128) -> String {
     let mut parts: Vec<String> = vec![];
     // convert to seconds to begin with

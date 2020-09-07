@@ -1,3 +1,47 @@
+#![warn(missing_docs)]
+#![warn(missing_doc_code_examples)]
+
+//! A shell-script-centric task scheduler; uses exit codes to determine control flow.
+//!
+//! Best explained with an example:
+//!
+//! `evry 2 weeks -scrapesite && wget "https://" -o ....`
+//!
+//! In other words, run the `wget` command every `2 weeks`.
+//!
+//! `evry` exits with an unsuccessful exit code if the command has been run in the last `2 weeks` (see the parser module for more examples), which means the `wget` command wouldn't run.
+//!
+//! When `evry` exits with a successful exit code, it saves the current time to a metadata file for that tag (`-scrapesite`). That way, when `evry` is run again with that tag, it can compare the current time against that file.
+//!
+//! This can *sort of* be thought of as `cron` alternative, but operations don't run in the background. It requires you to call the command yourself, but it won't run if its already run in the time frame you describe.
+//!
+//! You could have an infinite loop running in the background like:
+//!
+//! ```bash
+//! while true; do
+//!   evry 1 month -runcommand && run command
+//!   sleep 60
+//! done
+//! ```
+//!
+//! ... and even though that tries to run the command every 60 seconds, `evry` exits with an unsuccessful exit code, so `run command` would only get run once per month.
+//!
+//! The `-runcommand` is just an arbitrary tag name so that `evry` can save metadata about a command to run/job. Can be chosen arbitrarily, its only use is to uniquely identify runs of `evry`, and save a metadata file to your [local data directory](https://docs.rs/app_dirs/1.2.1/app_dirs/)
+//!
+//! Since this has no clue what the external command is, and whether it succeeds or not, this saves a history of one operation, so you can rollback when a tag was last run, in case of failure. An example:
+//!
+//! ```bash
+//! evry 2 months -selenium && {
+//! # evry succeeded, so the external command should be run
+//!     python selenium.py || {
+//!         # the python process exited with a non-zero exit code
+//!         # we should rollback when the command was last run, so
+//!         # we can re-try later
+//!         evry rollback -selenium
+//!     }
+//! }
+//! ```
+
 use std::env;
 use std::process::exit;
 
@@ -9,15 +53,21 @@ mod file;
 mod parser;
 mod utils;
 
+/// parses the user input; flags/environment variables
 #[derive(Debug)]
 pub struct CLI {
+    /// unparsed, string representation of a date from the user
     raw_date: String,
+    /// if EVRY_DEBUG=1 was set
     debug: bool,
+    /// if the user prompted a rollback
     rollback: bool,
+    /// tagfile to read/write from, uniquely identifies this job
     tag: file::Tag,
 }
 
 impl CLI {
+    /// prints the help message
     fn help(warn: bool) {
         if warn {
             println!("Not enough arguments provided.");
@@ -51,6 +101,7 @@ https://github.com/seanbreckenridge/evry for more examples."
         exit(2)
     }
 
+    /// parses command-line user input/environment variables
     pub fn parse_args(dir_info: &file::LocalDir) -> Self {
         // get arguments (remove binary name)
         let args: Vec<String> = env::args().skip(1).collect();
@@ -72,7 +123,10 @@ https://github.com/seanbreckenridge/evry for more examples."
             .chars()
             .next()
             .map(|c| &tag_raw[c.len_utf8()..])
-            .expect("Couldn't parse tag from arguments");
+            .expect("Error: Couldn't parse tag from arguments");
+        if tag.chars().count() == 0 {
+            eprintln!("Error: passed tag was an empty string");
+        }
         // if asked to rollback
         let rollback = &other_vec[0] == "rollback";
         CLI {
@@ -84,6 +138,10 @@ https://github.com/seanbreckenridge/evry for more examples."
     }
 }
 
+/// expects a tagfile and a duration/rollback
+///
+/// main entrypoint; runs checks on that tagfile
+/// and returns an exit code to signify what to do
 fn main() {
     // global application information
     let dir_info = file::LocalDir::new();
@@ -108,7 +166,14 @@ fn main() {
     }
 
     // parse duration string
-    let run_every = parser::parse_time(&cli.raw_date);
+    let run_every = match parser::parse_time(&cli.raw_date) {
+        Ok(time) => time,
+        Err(e) => {
+            eprintln!("Error: couldn't parse '{}' into a duration", cli.raw_date);
+            eprintln!("{:?}", e);
+            exit(3);
+        }
+    };
 
     // get current time
     let now = utils::epoch_millis();

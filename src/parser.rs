@@ -1,31 +1,49 @@
+//! Code to parse the duration grammar into milliseconds
+//!
+//! `parse_time` takes a string, and returns the duration that represents in milliseconds
+//!
+//! Examples of acceptable input:
+//!
+//! * `2 months, 5 day`
+//! * `2weeks 5hrs` (commas are optional)
+//! * `60secs`
+//! * `5wk, 5d`
+//! * `5weeks, 2weeks` (is additive, so this would result in 7 weeks)
+//! * `60sec 2weeks` (order doesn't matter)
+//!
+//! See [the grammar](https://github.com/seanbreckenridge/evry/blob/master/src/time.pest) for all
+//! possible time durations.
+
 use pest::Parser;
 
-// Code to parse the AST from the grammar into milliseconds
-
+/// The pest.rs Parser
 #[derive(Parser)]
 #[grammar = "time.pest"] // relative to src
 pub struct TimeParser;
 
+use std::error::Error;
+
+#[doc(hidden)]
 const YEAR_MILLIS: u128 = 31556952000;
+#[doc(hidden)]
 const MONTH_MILLIS: u128 = 2592000000;
+#[doc(hidden)]
 const WEEK_MILLIS: u128 = 604800000;
+#[doc(hidden)]
 const DAY_MILLIS: u128 = 86400000;
+#[doc(hidden)]
 const HOUR_MILLIS: u128 = 3600000;
+#[doc(hidden)]
 const MINUTE_MILLIS: u128 = 60000;
+#[doc(hidden)]
 const SECOND_MILLIS: u128 = 1000;
 
-/// uses macros to parse the pest.rs grammar into a duration
-pub fn parse_time(unparsed_input: &str) -> u128 {
-    let mut parsed_file = match TimeParser::parse(Rule::file, unparsed_input) {
-        Ok(file) => file,
-        Err(error) => {
-            eprintln!(
-                "Could not parse '{}' into a duration string.",
-                unparsed_input
-            );
-            panic!(error)
-        }
-    };
+/// uses macros to parse the pest.rs grammar into a duration (ms)
+///
+/// This parses the string into milliseconds.
+pub fn parse_time(unparsed_input: &str) -> Result<u128, Box<dyn Error>> {
+
+    let mut parsed_file = TimeParser::parse(Rule::file, unparsed_input)?;
 
     let mut total_millis: u128 = 0;
 
@@ -80,5 +98,5 @@ pub fn parse_time(unparsed_input: &str) -> u128 {
             _ => unreachable!(),
         };
     }
-    total_millis
+    Ok(total_millis)
 }

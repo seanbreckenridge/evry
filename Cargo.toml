@@ -1,8 +1,16 @@
 [package]
 name = "evry"
-version = "0.1.2"
+version = "0.1.3"
 authors = ["Sean Breckenridge <seanbrecke@gmail.com>"]
 edition = "2018"
+description = "A shell-script-centric task scheduler; uses exit codes to determine control flow"
+documentation = "https://docs.rs/evry"
+readme = "README.md"
+homepage = "https://github.com/seanbreckenridge/evry"
+repository = "https://github.com/seanbreckenridge/evry"
+license = "MIT"
+keywords = ["task scheduler", "cron"]
+categories = ["command-line-interface", "date-and-time", "filesystem", "parser-implementations"]
 
 [dependencies]
 app_dirs = "^1.2.1"
