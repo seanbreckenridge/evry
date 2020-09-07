@@ -11,6 +11,7 @@ repository = "https://github.com/seanbreckenridge/evry"
 license = "MIT"
 keywords = ["task scheduler", "cron"]
 categories = ["command-line-interface", "date-and-time", "filesystem", "parser-implementations"]
+exclude = ["test"]
 
 [dependencies]
 app_dirs = "^1.2.1"
