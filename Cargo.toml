@@ -9,7 +9,7 @@ readme = "README.md"
 homepage = "https://github.com/seanbreckenridge/evry"
 repository = "https://github.com/seanbreckenridge/evry"
 license = "MIT"
-keywords = ["task scheduler", "cron"]
+keywords = ["scheduler", "cron", "anacron"]
 categories = ["command-line-interface", "date-and-time", "filesystem", "parser-implementations"]
 exclude = ["test"]
 
