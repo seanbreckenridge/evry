@@ -88,30 +88,36 @@ fn main() {
     let dir_info = app_path::LocalDir::new();
     let cli = CLI::parse_args(&dir_info);
     if cli.debug {
-        println!("{:?}", dir_info);
-        println!("{:?}", cli);
+        println!("{}:Config:Data Directory: {:?}", cli.tag.name, dir_info.root_dir);
+        println!("{}:Config:Date String: '{}'", cli.tag.name, cli.args.join(" "));
     }
 
     if cli.rollback {
         if cli.debug {
-            println!("Running rollback...");
+            println!("{}:Running rollback...", cli.tag.name);
         }
         app_path::restore_rollback(&dir_info, &cli.tag);
         exit(0)
     }
 
     // parse duration string
-    let run_every = parser::parse_time(cli.args, cli.debug);
+    let run_every = parser::parse_time(cli.args);
 
     if cli.debug {
-        println!("Parsed input date string into {} milliseconds", run_every);
+        println!(
+            "{}:Parsed input date string into '{}' milliseconds",
+            cli.tag.name, run_every
+        );
     }
 
     if !cli.tag.file_exists() {
         // file doesn't exist, this is the first time this tag is being run.
         // save the current milliseconds to the file and exit with a 0 exit code
         if cli.debug {
-            println!("Tag file doesn't exist, creating and exiting successfully.")
+            println!(
+                "{}:Tag file doesn't exist, creating and exiting successfully.",
+                cli.tag.name
+            )
         }
         cli.tag.write_epoch_millis();
         exit(0)
@@ -121,7 +127,9 @@ fn main() {
         if app_path::epoch_time() - last_ran_at > run_every {
             // duration this should be run at has elapsed, run
             if cli.debug {
-                println!("Has been more than {} milliseconds, saving to rollback file and writing to tag file", run_every)
+                println!(
+                    "{}:Has been more than '{}' milliseconds since last succeeded, writing to tag file'",
+                    cli.tag.name, run_every)
             }
             // dump this to rollback file so it can this can be rolled back if external command fails
             app_path::save_rollback(&dir_info, last_ran_at);
@@ -131,7 +139,15 @@ fn main() {
         } else {
             // this has been run within the specified duration, don't run
             if cli.debug {
-                println!("Hasn't been more than {} milliseconds since last run according to tag file, failing (exit code 1)", run_every)
+                println!(
+                    "{}:'{}' milliseconds haven't elapsed since last run, exiting with code 1",
+                    cli.tag.name, run_every
+                );
+                println!(
+                    "{}:Will next be able to run in '{}' milliseconds",
+                    cli.tag.name,
+                    last_ran_at + run_every - app_path::epoch_time()
+                );
             }
             exit(1)
         }
