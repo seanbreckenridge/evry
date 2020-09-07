@@ -29,7 +29,7 @@ In other words, run the `wget` command every `2 weeks`.
 
 When `evry` exits with a successful exit code, it saves the current time to a metadata file for that tag (`-scrapesite`). That way, when `evry` is run again with that tag, it can compare the current time against that file.
 
-This can *sort of* be thought of as `cron` alternative, but operations don't run in the background. It requires you to call the command yourself, but it won't run if its already run in the time frame you describe.
+This can *sort of* be thought of as `cron` alternative, but operations don't run in the background. It requires you to call the command yourself, but it won't run if its already run in the time frame you describe. (However, its not difficult to wrap tasks that run behind `evry` in an infinite loop that runs in the background, which is what [`bgproc`](https://github.com/seanbreckenridge/bgproc) does)
 
 You could have an infinite loop running in the background like:
 
