@@ -111,7 +111,7 @@ fn main() {
     let run_every = parser::parse_time(&cli.raw_date);
 
     // get current time
-    let now = utils::epoch_time();
+    let now = utils::epoch_millis();
 
     if cli.debug {
         println!(
