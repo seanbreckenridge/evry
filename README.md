@@ -1,6 +1,6 @@
 # evry
 
-A tool to *manually* run commands -- periodically.
+A shell-script-centric task scheduler; uses exit codes to determine control flow.
 
 ### Install
 
@@ -11,8 +11,6 @@ cargo install --git https://gitlab.com/seanbreckenridge/evry
 ```
 
 ## Rationale
-
-Uses shell exit codes to determine control flow in shell scripts.
 
 ```
 Usage:
@@ -31,20 +29,6 @@ In other words, run the `wget` command every `2 weeks`.
 
 When `evry` exits with a successful exit code, it saves the current time to a metadata file for that tag (`-scrapesite`). That way, when `evry` is run again with that tag, it can compare the current time against that file.
 
-Since this has no clue what the external command is, and whether it succeeds or not, this saves a history of one operation, so you can rollback when a tag was last run, in case of failure. An example:
-
-```
-evry 2 months -selenium && {
-# evry succeeded, so the external command should be run
-    python selenium.py || {
-        # the python process exited with a non-zero exit code
-        # we should rollback when the command was last run, so
-        # we can re-try later
-        evry rollback -selenium
-    }
-}
-```
-
 This can *sort of* be thought of as `cron` alternative, but operations don't run in the background. It requires you to call the command yourself, but it won't run if its already run in the time frame you describe.
 
 You could have an infinite loop running in the background like:
@@ -59,6 +43,21 @@ done
 ... and even though that tries to run the command every 60 seconds, `evry` exits with an unsuccessful exit code, so `run command` would only get run once per month.
 
 The `-runcommand` is just an arbitrary tag name so that `evry` can save metadata about a command to run/job. Can be chosen arbitrarily, its only use is to uniquely identify runs of `evry`, and save a metadata file to your [local data directory](https://docs.rs/app_dirs/1.2.1/app_dirs/)
+
+Since this has no clue what the external command is, and whether it succeeds or not, this saves a history of one operation, so you can rollback when a tag was last run, in case of failure. An example:
+
+```
+evry 2 months -selenium && {
+# evry succeeded, so the external command should be run
+    python selenium.py || {
+        # the python process exited with a non-zero exit code
+        # we should rollback when the command was last run, so
+        # we can re-try later
+        evry rollback -selenium
+    }
+}
+```
+
 
 ### Duration
 
