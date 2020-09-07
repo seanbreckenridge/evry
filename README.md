@@ -33,7 +33,7 @@ This can *sort of* be thought of as `cron` alternative, but operations don't run
 
 You could have an infinite loop running in the background like:
 
-```
+```bash
 while true; do
   evry 1 month -runcommand && run command
   sleep 60
@@ -46,7 +46,7 @@ The `-runcommand` is just an arbitrary tag name so that `evry` can save metadata
 
 Since this has no clue what the external command is, and whether it succeeds or not, this saves a history of one operation, so you can rollback when a tag was last run, in case of failure. An example:
 
-```
+```bash
 evry 2 months -selenium && {
 # evry succeeded, so the external command should be run
     python selenium.py || {
