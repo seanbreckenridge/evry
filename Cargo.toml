@@ -1,6 +1,6 @@
 [package]
 name = "evry"
-version = "0.1.5"
+version = "0.1.6"
 authors = ["Sean Breckenridge <seanbrecke@gmail.com>"]
 edition = "2018"
 description = "A shell-script-centric task scheduler; uses exit codes to determine control flow"

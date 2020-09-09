@@ -4,7 +4,7 @@ number = { (ASCII_DIGIT | "_")+ }
 // different possible singular time units
 year = { "yr" | "year" }
 month = { "month" }
-week = { "weeks" | "wk" }
+week = { "week" | "wk" }
 day = { "day" | "dy" | "d" }
 hour = { "hour" | "hr" }
 minute = { "minute" | "min" }
