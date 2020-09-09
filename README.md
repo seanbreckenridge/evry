@@ -42,7 +42,7 @@ done
 
 ... and even though that tries to run the command every 60 seconds, `evry` exits with an unsuccessful exit code, so `run command` would only get run once per month.
 
-The `-runcommand` is just an arbitrary tag name so that `evry` can save metadata about a command to run/job. Can be chosen arbitrarily, its only use is to uniquely identify runs of `evry`, and save a metadata file to your [local data directory](https://docs.rs/app_dirs/1.2.1/app_dirs/)
+The `-runcommand` is just an arbitrary tag name so that `evry` can save metadata about a command to run/job. It can be chosen arbitrarily, its only use is to uniquely identify some task, and save a metadata file to your [local data directory](https://docs.rs/app_dirs/1.2.1/app_dirs/).
 
 Since this has no clue what the external command is, and whether it succeeds or not, this saves a history of one operation, so you can rollback when a tag was last run, in case of failure. An example:
 
@@ -57,7 +57,6 @@ evry 2 months -selenium && {
     }
 }
 ```
-
 
 ### Duration
 
@@ -82,6 +81,8 @@ pythonanywhere:'60 days' (5184000000ms) hasn't elapsed since last run, exiting w
 pythonanywhere:Will next be able to run in '55 days, 13 hours, 56 minutes, 18 seconds' (4802178196ms)
 ```
 
+If you wanted to 'reset' a task, you could do: `rm ~/.local/share/evry/data/<tag name>`; removing the tag file. The next time that `evry` runs, it'll assume its a new task, and exit successfully.
+
 ### How I use this
 
 I have certain jobs (e.g. scraping websites for metadata, using [selenium](https://www.selenium.dev/) to [login to some website and click a button](https://github.com/seanbreckenridge/pythonanywhere-3-months), updating specific packages (e.g. [running `brew cask upgrade --greedy` on mac](https://github.com/seanbreckenridge/dotfiles/blob/e11aea908ec4f2dd111143ebfe5d6a4eb07e268c/.config/zsh/functions/update#L11))) that I want to run periodically.
@@ -90,5 +91,5 @@ Putting all my jobs I want to run periodically in one [housekeeping](https://sea
 
 This also means that all my 'cron-like' jobs are just bash scripts, and can be checked into version control easily.
 
-I also have a [background loop script](https://github.com/seanbreckenridge/bgproc) that uses this to run tasks periodically, which I prefer to cron on my main machine.
+I also have a [background loop script](https://github.com/seanbreckenridge/bgproc) that uses this to run tasks periodically, which I prefer to cron on my main machine. For examples of usage of `evry` there, you can look [here](https://github.com/seanbreckenridge/bgproc/tree/master/personal_jobs) and [here](https://github.com/seanbreckenridge/HPI/tree/master/jobs).
 
