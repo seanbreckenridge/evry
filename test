@@ -1,5 +1,9 @@
-#!/bin/bash
+#!/bin/bash -u
 # Test typical usage for the evry program
+
+rm_if_exists() {
+	[[ -e "$1" ]] && rm "$1"
+}
 
 cargo build || exit $?
 evry='./target/debug/evry'
@@ -9,8 +13,8 @@ export EVRY_DEBUG=1
 TAG_FILE="${XDG_DATA_HOME:-$HOME/.local/share}/evry/data/evrytest"
 ROLLBACK_FILE="${XDG_DATA_HOME:-$HOME/.local/share}/evry/rollback"
 
-rm "$TAG_FILE"
-rm "$ROLLBACK_FILE"
+rm_if_exists "$TAG_FILE"
+rm_if_exists "$ROLLBACK_FILE"
 
 # test non-existent file
 "$evry" 5 seconds -evrytest
@@ -47,4 +51,4 @@ sleep 5
 		printf "Expected the contents of the TAG_FILE to be %d - found %d\n" "$ROLLBACK_CONTENTS" "$TAG_CONTENTS"
 	fi
 }
-rm "$TAG_FILE"
+rm_if_exists "$TAG_FILE"
