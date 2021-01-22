@@ -42,7 +42,6 @@ const SECOND_MILLIS: u128 = 1000;
 ///
 /// This parses the string into milliseconds.
 pub fn parse_time(unparsed_input: &str) -> Result<u128, Box<dyn Error>> {
-
     let mut parsed_file = TimeParser::parse(Rule::file, unparsed_input)?;
 
     let mut total_millis: u128 = 0;

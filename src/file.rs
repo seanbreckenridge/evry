@@ -10,7 +10,6 @@ use std::{
     path::{Path, PathBuf},
 };
 
-
 /// static information about this application
 ///
 /// Used to determine where to put local data on the users filesystem
@@ -18,7 +17,6 @@ const APP_INFO: AppInfo = AppInfo {
     name: "evry",
     author: "seanbreckenridge",
 };
-
 
 /// Keeps track of the user data dir, creates directories if they don't exist
 #[derive(Debug, Default)]
@@ -79,7 +77,7 @@ pub fn restore_rollback(local_dir: &LocalDir, tag: &Tag) {
 ///
 /// Holds metadata about the tag name,
 /// and gives access to the underlying file.
-/// 
+///
 /// ```
 /// evry 2 months -sometool && run tool
 /// evry 10 minutes -requestfile && wget ...
