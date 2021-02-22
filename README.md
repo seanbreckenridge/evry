@@ -93,5 +93,5 @@ Putting all my jobs I want to run periodically in one [housekeeping](https://sea
 
 This also means that all my 'cron-like' jobs are just bash scripts, and can be checked into version control easily.
 
-I also have a [background loop script](https://github.com/seanbreckenridge/bgproc) that uses this to run tasks periodically, which I prefer to cron on my main machine. For examples of usage of `evry` there, you can look [here](https://github.com/seanbreckenridge/bgproc/tree/master/personal_jobs) and [here](https://github.com/seanbreckenridge/HPI/tree/master/jobs).
+I also have a [background loop script](https://github.com/seanbreckenridge/bgproc) that uses this to run tasks periodically, which I prefer to cron on my main machine. For examples of usage of `evry` there, you can look [here](https://github.com/seanbreckenridge/dotfiles/tree/master/.local/scripts/supervisor)
 
