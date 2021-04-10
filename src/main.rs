@@ -62,6 +62,8 @@ pub struct CLI {
     debug: bool,
     /// if the user prompted a rollback
     rollback: bool,
+    /// if the user asked to print the computed tag location instead of running
+    location: bool,
     /// tagfile to read/write from, uniquely identifies this job
     tag: file::Tag,
 }
@@ -79,6 +81,7 @@ Uses shell exit codes to determine control flow in shell scripts
 Usage:
   evry [describe duration]... <-tagname>
   evry rollback <-tagname>
+  evry location <-tagname>
   evry help
 
 
@@ -94,6 +97,8 @@ been run in the last 2 weeks, which means the wget command wouldn't run.
 When evry exits with a successful exit code, it saves the current time
 to a metadata file for that tag (-scrapesite). That way, when evry
 is run again with that tag, it can compare the current time against that file.
+
+location prints the computed tag file location
 
 rollback is used incase the command failed to run, see
 https://github.com/seanbreckenridge/evry for more examples."
@@ -127,12 +132,12 @@ https://github.com/seanbreckenridge/evry for more examples."
         if tag.chars().count() == 0 {
             eprintln!("Error: passed tag was an empty string");
         }
-        // if asked to rollback
-        let rollback = &other_vec[0] == "rollback";
+        let first_arg = &other_vec[0];
         CLI {
             raw_date: other_vec.join(" "),
             debug: env::var("EVRY_DEBUG").is_ok(),
-            rollback,
+            rollback: first_arg == "rollback",
+            location: first_arg == "location",
             tag: file::Tag::new(tag.to_string(), dir_info),
         }
     }
@@ -155,6 +160,11 @@ fn main() {
             cli.tag.name,
             d.into_os_string().into_string().unwrap()
         );
+    }
+
+    if cli.location {
+        println!("{}", cli.tag.path);
+        exit(0);
     }
 
     if cli.rollback {

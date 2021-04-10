@@ -86,7 +86,7 @@ pub fn restore_rollback(local_dir: &LocalDir, tag: &Tag) {
 pub struct Tag {
     /// the name of this tag, like `requestfile`
     pub name: String,
-    /// the computed location of ths tag, like `~/.local/share/evry/data/requestfile`
+    /// the computed location of this tag, like `~/.local/share/evry/data/requestfile`
     pub path: String,
 }
 

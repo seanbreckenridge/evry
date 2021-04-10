@@ -13,9 +13,13 @@ cargo install evry
 ## Rationale
 
 ```
+A tool to manually run commands -- periodically.
+Uses shell exit codes to determine control flow in shell scripts
+
 Usage:
   evry [describe duration]... <-tagname>
   evry rollback <-tagname>
+  evry location <-tagname>
   evry help
 ```
 
