@@ -73,7 +73,7 @@ The duration (e.g. `evry 2 months, 5 days`) is parsed with a [`PEG`](https://en.
 - `5weeks, 2weeks` (is additive, so this would result in 7 weeks)
 - `60sec 2weeks` (order doesn't matter)
 
-See [the grammar](https://github.com/seanbreckenridge/evry/blob/552739ac4d828036038ca310e4b57ca776fd29b6/src/time.pest#L5-L11) for all possible abbreviations.
+See [the grammar](https://github.com/seanbreckenridge/evry/blob/f158ecb3632930d2b71d597bdfbd6a6e7ee16104/src/time.pest#L5-L11) for all possible abbreviations.
 
 ### Advanced Usage
 
