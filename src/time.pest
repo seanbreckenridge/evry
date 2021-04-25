@@ -2,16 +2,18 @@
 number = { (ASCII_DIGIT | "_")+ }
 
 // different possible singular time units
-year = { "yr" | "year" }
-month = { "month" }
-week = { "week" | "wk" }
+year = { "year" | "yr" | "y" }
+month = { "month" | "mo" }
+week = { "week" | "wk" | "w" }
 day = { "day" | "dy" | "d" }
-hour = { "hour" | "hr" }
-minute = { "minute" | "min" }
-second = { "second" | "sec" }
+hour = { "hour" | "hr" | "h" }
+minute = { "minute" | "min" | "m" }
+second = { "second" | "sec" | "s" }
 
 // one time unit (singular)
-singular = { (day | hour | minute | week | month | second | year) }
+// month must appear before minute since minute
+// will consume the token before month has a chance to
+singular = { (month | day | hour | minute | week | second | year) }
 // @ means atomic rule, doesnt apply WHITESPACE
 plural = @{ singular ~ "s" }
 
