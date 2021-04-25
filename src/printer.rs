@@ -14,9 +14,9 @@ pub enum PrinterType {
 #[derive(Serialize)]
 pub struct Message {
     /// type of message
-    pub r#type: String,
+    r#type: String,
     /// message to print
-    pub body: String,
+    body: String,
 }
 
 impl Message {
@@ -27,14 +27,14 @@ impl Message {
         }
     }
 
-    pub fn intersperse(&self, delim: &str) -> String {
+    fn intersperse(&self, delim: &str) -> String {
         format!("{}{}{}", self.r#type, delim, self.body)
     }
 }
 
 pub struct Printer {
     /// how to print these messages
-    pub printer_type: PrinterType,
+    printer_type: PrinterType,
     /// messages to print
     messages: Vec<Message>,
 }

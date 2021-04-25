@@ -57,7 +57,7 @@ mod utils;
 
 /// parses the user input; flags/environment variables
 #[derive(Debug)]
-pub struct Args {
+struct Args {
     /// unparsed, string representation of a date from the user
     raw_date: String,
     /// if EVRY_DEBUG=1 was set
@@ -111,7 +111,7 @@ https://github.com/seanbreckenridge/evry for more examples."
     }
 
     /// parses command-line user input/environment variables
-    pub fn parse_args(dir_info: &file::LocalDir) -> Self {
+    fn parse_args(dir_info: &file::LocalDir) -> Self {
         // get arguments (remove binary name)
         let args: Vec<String> = env::args().skip(1).collect();
         let args_len = args.len();
