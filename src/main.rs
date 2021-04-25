@@ -1,5 +1,6 @@
 #![warn(missing_docs)]
 #![warn(missing_doc_code_examples)]
+#![allow(clippy::needless_return)]
 
 //! A shell-script-centric task scheduler; uses exit codes to determine control flow.
 //!
@@ -51,15 +52,18 @@ extern crate pest_derive;
 
 mod file;
 mod parser;
+mod printer;
 mod utils;
 
 /// parses the user input; flags/environment variables
 #[derive(Debug)]
-pub struct CLI {
+pub struct Args {
     /// unparsed, string representation of a date from the user
     raw_date: String,
     /// if EVRY_DEBUG=1 was set
     debug: bool,
+    /// if EVRY_JSON=1 was set
+    json: bool,
     /// if the user prompted a rollback
     rollback: bool,
     /// if the user asked to print the computed tag location instead of running
@@ -68,7 +72,7 @@ pub struct CLI {
     tag: file::Tag,
 }
 
-impl CLI {
+impl Args {
     /// prints the help message
     fn help(warn: bool) {
         if warn {
@@ -103,7 +107,7 @@ location prints the computed tag file location
 rollback is used incase the command failed to run, see
 https://github.com/seanbreckenridge/evry for more examples."
         );
-        exit(2)
+        exit(10)
     }
 
     /// parses command-line user input/environment variables
@@ -113,14 +117,14 @@ https://github.com/seanbreckenridge/evry for more examples."
         let args_len = args.len();
         // if user asked for help
         if args_len >= 1 && (args[0] == "help" || args[0] == "--help") {
-            CLI::help(false)
+            Args::help(false)
         }
-        // split CLI arguments into tag/other strings
+        // split args arguments into tag/other strings
         let (tag_vec, other_vec): (_, Vec<_>) =
             args.into_iter().partition(|arg| arg.starts_with('-'));
         // user didn't provide argument
         if tag_vec.is_empty() || other_vec.is_empty() {
-            CLI::help(true)
+            Args::help(true)
         }
         // parse tag, remove the '-' from the name
         let tag_raw = &tag_vec[0];
@@ -133,9 +137,13 @@ https://github.com/seanbreckenridge/evry for more examples."
             eprintln!("Error: passed tag was an empty string");
         }
         let first_arg = &other_vec[0];
-        CLI {
+        let json = env::var("EVRY_JSON").is_ok();
+        Args {
             raw_date: other_vec.join(" "),
-            debug: env::var("EVRY_DEBUG").is_ok(),
+            // specifying EVRY_JSON automatically enables debug as well
+            // otherwise evry is supposed to remain silent -- its not meant to print anything
+            debug: json | env::var("EVRY_DEBUG").is_ok(),
+            json,
             rollback: first_arg == "rollback",
             location: first_arg == "location",
             tag: file::Tag::new(tag.to_string(), dir_info),
@@ -143,45 +151,43 @@ https://github.com/seanbreckenridge/evry for more examples."
     }
 }
 
-/// expects a tagfile and a duration/rollback
-///
-/// main entrypoint; runs checks on that tagfile
-/// and returns an exit code to signify what to do
-fn main() {
-    // global application information
-    let dir_info = file::LocalDir::new();
-    let cli = CLI::parse_args(&dir_info);
-
+/// encapsulates the logic for evry, printing logs to the printer
+/// if debug is enabled.
+/// Returns an exit code to signify what to do
+fn evry(dir_info: file::LocalDir, cli: Args, printer: &mut printer::Printer) -> i32 {
     if cli.debug {
+        printer.echo("tag_name", &cli.tag.name);
         let mut d = dir_info.root_dir.clone();
         d.push("data");
-        println!(
-            "{}:data directory: {}",
-            cli.tag.name,
-            d.into_os_string().into_string().unwrap()
-        );
+        printer.echo("data_directory", &d.into_os_string().into_string().unwrap());
     }
 
     if cli.location {
+        // causes an early exit, print directly instead of using the printer
+        // user is probably trying to use this to compute the location like
+        // SHELLVAR="$(evry location -tagname)"
         println!("{}", cli.tag.path);
-        exit(0);
+        return 0;
     }
 
     if cli.rollback {
         if cli.debug {
-            println!("{}:Running rollback...", cli.tag.name);
+            printer.echo("log", "Running rollback...")
         }
         file::restore_rollback(&dir_info, &cli.tag);
-        exit(0)
+        return 0;
     }
 
     // parse duration string
     let run_every = match parser::parse_time(&cli.raw_date) {
         Ok(time) => time,
-        Err(e) => {
-            eprintln!("Error: couldn't parse '{}' into a duration", cli.raw_date);
-            eprintln!("{:?}", e);
-            exit(3);
+        Err(_e) => {
+            printer.echo(
+                "error",
+                &format!("couldn't parse '{}' into a duration", cli.raw_date),
+            );
+            // eprintln!("{:?}", _e);
+            return 1; // signify fatal error
         }
     };
 
@@ -189,9 +195,20 @@ fn main() {
     let now = utils::epoch_millis();
 
     if cli.debug {
-        println!(
-            "{}:Parsed '{}' into {}ms",
-            cli.tag.name, cli.raw_date, run_every
+        printer.echo(
+            "log",
+            &format!("parsed '{}' into {}ms", cli.raw_date, run_every),
+        );
+        printer.print(
+            printer::Message::new("duration", &format!("{}", run_every)),
+            Some(printer::PrinterType::Json),
+        );
+        printer.print(
+            printer::Message::new(
+                "duration_pretty",
+                &utils::describe_ms(run_every),
+            ),
+            Some(printer::PrinterType::Json),
         );
     }
 
@@ -199,46 +216,78 @@ fn main() {
         // file doesn't exist, this is the first time this tag is being run.
         // save the current milliseconds to the file and exit with a 0 exit code
         if cli.debug {
-            println!(
-                "{}:Tag file doesn't exist, creating and exiting with code 0",
-                cli.tag.name
-            )
+            printer.echo(
+                "log",
+                "Tag file doesn't exist, creating and exiting with code 0",
+            );
         }
         cli.tag.write(now);
-        exit(0)
+        return 0;
     } else {
         // file exists, read last time this tag was run
         let last_ran_at = cli.tag.read_epoch_millis();
         if now - last_ran_at > run_every {
             // duration this should be run at has elapsed, run
             if cli.debug {
-                println!(
-                    "{}:Has been more than '{}' ({}ms) since last succeeded, writing to tag file, exiting with code 0",
-                    cli.tag.name, utils::describe_ms(run_every), run_every)
+                printer.echo("log", &format!("Has been more than '{}' ({}ms) since last succeeded, writing to tag file, exiting with code 0", utils::describe_ms(run_every), run_every));
             }
             // dump this to rollback file so it can this can be rolled back if external command fails
             file::save_rollback(&dir_info, last_ran_at);
             // save current time to tag file
             cli.tag.write(now);
-            exit(0)
+            return 0;
         } else {
             // this has been run within the specified duration, don't run
             if cli.debug {
-                println!(
-                    "{}:'{}' ({}ms) hasn't elapsed since last run, exiting with code 1",
-                    cli.tag.name,
-                    utils::describe_ms(run_every),
-                    run_every
+                printer.echo(
+                    "log",
+                    &format!(
+                        "{} ({}ms) haven't elapsed since last run, exiting with code 1",
+                        utils::describe_ms(run_every),
+                        run_every
+                    ),
                 );
                 let till_next_run = last_ran_at + run_every - now;
-                println!(
-                    "{}:Will next be able to run in '{}' ({}ms)",
-                    cli.tag.name,
-                    utils::describe_ms(till_next_run),
-                    till_next_run
+                let till_next_pretty = utils::describe_ms(till_next_run);
+                printer.echo(
+                    "log",
+                    &format!(
+                        "Will next be able to run in '{}' ({}ms)",
+                        till_next_pretty, till_next_run
+                    ),
+                );
+                printer.print(
+                    printer::Message::new("till_next", &format!("{}", till_next_run)),
+                    Some(printer::PrinterType::Json),
+                );
+                printer.print(
+                    printer::Message::new("till_next_pretty", &till_next_pretty),
+                    Some(printer::PrinterType::Json),
                 );
             }
-            exit(1)
+            return 2; // exit code 2; expected error, to cause next shell command to not run
         }
     }
+}
+
+fn main() {
+    // global application information
+    let dir_info = file::LocalDir::new();
+    let cli = Args::parse_args(&dir_info);
+
+    let printer_type = if cli.json {
+        printer::PrinterType::Json
+    } else {
+        printer::PrinterType::Stderr
+    };
+
+    // handles printing/saving messages incase we're in JSON mode
+    let mut printer = printer::Printer::new(printer_type);
+
+    // run 'main' code, saving exit code
+    let result = evry(dir_info, cli, &mut printer);
+
+    // if user specified JSON, print the blob
+    printer.flush();
+    exit(result);
 }

@@ -1,6 +1,6 @@
 [package]
 name = "evry"
-version = "0.1.7"
+version = "0.1.8"
 authors = ["Sean Breckenridge <seanbrecke@gmail.com>"]
 edition = "2018"
 description = "A shell-script-centric task scheduler; uses exit codes to determine control flow"
@@ -17,3 +17,6 @@ exclude = ["test"]
 app_dirs = "^1.2.1"
 pest = "2.0"
 pest_derive = "2.0"
+serde = {version = "1.0.125", features = ["derive"]}
+serde_json = "1.0.64"
+

@@ -14,6 +14,9 @@
 //! See [the grammar](https://github.com/seanbreckenridge/evry/blob/master/src/time.pest) for all
 //! possible time durations.
 
+// for pest macros
+#![allow(clippy::upper_case_acronyms)]
+
 use pest::Parser;
 
 /// The pest.rs Parser
