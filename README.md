@@ -75,13 +75,12 @@ The duration (e.g. `evry 2 months, 5 days`) is parsed with a [`PEG`](https://en.
 
 See [the grammar](https://github.com/seanbreckenridge/evry/blob/552739ac4d828036038ca310e4b57ca776fd29b6/src/time.pest#L5-L11) for all possible abbreviations.
 
-### Usage
+### Advanced Usage
 
 The `EVRY_DEBUG` environment variable can be set to provide information on what was parsed from user input, and how long till the next run succeeds.
 
-`EVRY_DEBUG=1 evry 2 months -pythonanywhere && pythonanywhere_3_months -Hc "$(which chromedriver)"`
-
 ```
+$ EVRY_DEBUG=1 evry 2 months -pythonanywhere && pythonanywhere_3_months -Hc "$(which chromedriver)"
 tag_name:pythonanywhere
 data_directory:/home/sean/.local/share/evry/data
 log:parsed '2 months' into 5184000000ms
@@ -105,9 +104,7 @@ job-reset () {
 
 The `EVRY_JSON` environment variable can be set to provide similar information in a more consumable format (e.g. with [`jq`](https://github.com/stedolan/jq))
 
-As an example:
-
-`./schedule_task`
+As an example; `./schedule_task`:
 
 ```bash
 #!/bin/bash
