@@ -204,10 +204,7 @@ fn evry(dir_info: file::LocalDir, cli: Args, printer: &mut printer::Printer) -> 
             Some(printer::PrinterType::Json),
         );
         printer.print(
-            printer::Message::new(
-                "duration_pretty",
-                &utils::describe_ms(run_every),
-            ),
+            printer::Message::new("duration_pretty", &utils::describe_ms(run_every)),
             Some(printer::PrinterType::Json),
         );
     }
