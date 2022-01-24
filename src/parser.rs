@@ -72,7 +72,7 @@ pub fn parse_time(unparsed_input: &str) -> Result<u128, Box<dyn Error>> {
                     // This looks a bit dangerous but its fine since pest is handling
                     // the erroneous input, we're just traversing the AST
                     let unit_millis: u128 =
-                        match TimeParser::parse(Rule::singular, &unit_str.as_str())
+                        match TimeParser::parse(Rule::singular, unit_str.as_str())
                             .ok() // parse result
                             .unwrap()
                             .next() // surrounding (singular/plural pair)

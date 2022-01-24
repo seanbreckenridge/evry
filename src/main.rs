@@ -29,19 +29,7 @@
 //!
 //! The `-runcommand` is just an arbitrary tag name so that `evry` can save metadata about a command to run/job. Can be chosen arbitrarily, its only use is to uniquely identify runs of `evry`, and save a metadata file to your [local data directory](https://docs.rs/app_dirs/1.2.1/app_dirs/)
 //!
-//! Since this has no clue what the external command is, and whether it succeeds or not, this saves a history of one operation, so you can rollback when a tag was last run, in case of failure. An example:
-//!
-//! ```bash
-//! evry 2 months -selenium && {
-//! # evry succeeded, so the external command should be run
-//!     python selenium.py || {
-//!         # the python process exited with a non-zero exit code
-//!         # we should rollback when the command was last run, so
-//!         # we can re-try later
-//!         evry rollback -selenium
-//!     }
-//! }
-//! ```
+//! Since this doesn't run in a larger context and its just a bash script, if a command fails, you can remove the tag file, to reset it to run again later (since if the file doesn't exist, `evry` assumes its a new task)
 
 use std::env;
 use std::process::exit;
@@ -84,10 +72,8 @@ Uses shell exit codes to determine control flow in shell scripts
 
 Usage:
   evry [describe duration]... <-tagname>
-  evry rollback <-tagname>
   evry location <-tagname>
   evry help
-
 
 Best explained with an example:
 
@@ -104,8 +90,7 @@ is run again with that tag, it can compare the current time against that file.
 
 location prints the computed tag file location
 
-rollback is used incase the command failed to run, see
-https://github.com/seanbreckenridge/evry for more examples."
+See https://github.com/seanbreckenridge/evry for more examples."
         );
         exit(10)
     }
@@ -171,8 +156,9 @@ fn evry(dir_info: file::LocalDir, cli: Args, printer: &mut printer::Printer) -> 
     }
 
     if cli.rollback {
+        eprintln!("'rollback' is deprecated, use the location command to reset tasks instead. E.g. 'rm -f \"$(evry location -{})\"'", cli.tag.name);
         if cli.debug {
-            printer.echo("log", "Running rollback...")
+            printer.echo("log", "Running rollback...");
         }
         file::restore_rollback(&dir_info, &cli.tag);
         return 0;

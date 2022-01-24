@@ -18,7 +18,6 @@ Uses shell exit codes to determine control flow in shell scripts
 
 Usage:
   evry [describe duration]... <-tagname>
-  evry rollback <-tagname>
   evry location <-tagname>
   evry help
 ```
@@ -48,16 +47,17 @@ done
 
 The `-runcommand` is just an arbitrary tag name so that `evry` can save metadata about a command to run/job. It can be chosen arbitrarily, its only use is to uniquely identify some task, and save a metadata file to your [local data directory](https://docs.rs/app_dirs/1.2.1/app_dirs/).
 
-Since this has no clue what the external command is, and whether it succeeds or not, this saves a history of one operation, so you can rollback when a tag was last run, in case of failure. An example:
+Since this doesn't run in a larger context and `evry` can't know if a command failed to run - if a command fails, you can remove the tag file, to reset it to run again later (since if the file doesn't exist, `evry` assumes its a new task):
 
 ```bash
 evry 2 months -selenium && {
 # evry succeeded, so the external command should be run
     python selenium.py || {
         # the python process exited with a non-zero exit code
-        # we should rollback when the command was last run, so
-        # we can re-try later
-        evry rollback -selenium
+        # remove the tag file so we can re-try later
+        rm "$(evry location -selenium)"
+        # maybe notify you that this failed so you go and check on it
+        notify-send -u critical 'selenium failed!"
     }
 }
 ```
