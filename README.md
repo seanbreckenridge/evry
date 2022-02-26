@@ -91,14 +91,14 @@ log:Will next be able to run in '46 days, 16 hours, 46 minutes, 6 seconds' (4034
 If you wanted to 'reset' a task, you could do: `rm ~/.local/share/evry/data/<tag name>`; removing the tag file. The next time that `evry` runs, it'll assume its a new task, and exit successfully. I use the following shell function to 'reset' tasks:
 
 ```bash
-job-reset () {
-        local EVRY_DATA_DIR CHOSEN_TAG
-        # use the 'location' command with an arbitrary tag to get the data dir
-        EVRY_DATA_DIR="$(dirname "$(evry location -tag)")"
-        cd "${EVRY_DATA_DIR}"
-        CHOSEN_TAG="$(fzf)"  || return 1
-        rm -v "${CHOSEN_TAG}"
-        cd -
+job-reset() {
+	local EVRY_DATA_DIR CHOSEN_TAG
+	EVRY_DATA_DIR="$(dirname "$(evry location - 2>/dev/null)")"
+	cd "${EVRY_DATA_DIR}"
+	fzf -m | while read -r tag; do
+		rm -v "${tag}"
+	done
+	cd -
 }
 ```
 
