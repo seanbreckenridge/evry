@@ -52,8 +52,6 @@ struct Args {
     debug: bool,
     /// if EVRY_JSON=1 was set
     json: bool,
-    /// if the user prompted a rollback
-    rollback: bool,
     /// if the user asked to print the computed tag location instead of running
     location: bool,
     /// tagfile to read/write from, uniquely identifies this job
@@ -129,7 +127,6 @@ See https://github.com/seanbreckenridge/evry for more examples."
             // otherwise evry is supposed to remain silent -- its not meant to print anything
             debug: json | env::var("EVRY_DEBUG").is_ok(),
             json,
-            rollback: first_arg == "rollback",
             location: first_arg == "location",
             tag: file::Tag::new(tag.to_string(), dir_info),
         }
@@ -142,7 +139,7 @@ See https://github.com/seanbreckenridge/evry for more examples."
 fn evry(dir_info: file::LocalDir, cli: Args, printer: &mut printer::Printer) -> i32 {
     if cli.debug {
         printer.echo("tag_name", &cli.tag.name);
-        let mut d = dir_info.root_dir.clone();
+        let mut d = dir_info.root_dir;
         d.push("data");
         printer.echo("data_directory", &d.into_os_string().into_string().unwrap());
     }
@@ -152,15 +149,6 @@ fn evry(dir_info: file::LocalDir, cli: Args, printer: &mut printer::Printer) -> 
         // user is probably trying to use this to compute the location like
         // SHELLVAR="$(evry location -tagname)"
         println!("{}", cli.tag.path);
-        return 0;
-    }
-
-    if cli.rollback {
-        eprintln!("'rollback' is deprecated, use the location command to reset tasks instead. E.g. 'rm -f \"$(evry location -{})\"'", cli.tag.name);
-        if cli.debug {
-            printer.echo("log", "Running rollback...");
-        }
-        file::restore_rollback(&dir_info, &cli.tag);
         return 0;
     }
 
@@ -214,8 +202,6 @@ fn evry(dir_info: file::LocalDir, cli: Args, printer: &mut printer::Printer) -> 
             if cli.debug {
                 printer.echo("log", &format!("Has been more than '{}' ({}ms) since last succeeded, writing to tag file, exiting with code 0", utils::describe_ms(run_every), run_every));
             }
-            // dump this to rollback file so it can this can be rolled back if external command fails
-            file::save_rollback(&dir_info, last_ran_at);
             // save current time to tag file
             cli.tag.write(now);
             return 0;

@@ -44,32 +44,6 @@ pub fn read_epoch_millis(filepath: &str) -> u128 {
         .expect("Could not convert tag file information to integer")
 }
 
-/// read string from rollback file
-fn rollback_file(local_dir: &LocalDir) -> String {
-    let mut local_filepath = local_dir.root_dir.clone();
-    local_filepath.push("rollback");
-    local_filepath.into_os_string().into_string().unwrap()
-}
-
-/// before a file is overwritten, save a backup of the file so a rollback can be done
-pub fn save_rollback(local_dir: &LocalDir, timestamp: u128) {
-    let filepath = rollback_file(local_dir);
-    let fp = File::create(filepath).expect("Could not create tag file");
-    let mut writer = BufWriter::new(&fp);
-    write!(&mut writer, "{}", timestamp).expect("Could not write to file")
-}
-
-/// read when the last run happened from the rollback file and save it to the tag file
-pub fn restore_rollback(local_dir: &LocalDir, tag: &Tag) {
-    // read previous runs epoch time from the rollback file
-    let filepath = rollback_file(local_dir);
-    let rollback_millis = read_epoch_millis(&filepath);
-    // write to tag file
-    let fp = File::create(&tag.path).expect("Could not create tag file");
-    let mut writer = BufWriter::new(&fp);
-    write!(&mut writer, "{}", rollback_millis).expect("Could not write to file")
-}
-
 /// A 'tag' is the name of some evry task
 ///
 /// This is used to differentiate
