@@ -30,7 +30,4 @@ sleep 5
 "$evry" 5 seconds -evrytest
 (($? == 0)) && echo '.' || echo "FAIL: after duration has elapsed, failed with non zero exit code"
 
-sleep 5
-# test the typical usage, with a rollback it it fails
-# in this case, the command fails
 rm_if_exists "$TAG_FILE"
