@@ -73,7 +73,31 @@ The duration (e.g. `evry 2 months, 5 days`) is parsed with a [`PEG`](https://en.
 - `5weeks, 2weeks` (is additive, so this would result in 7 weeks)
 - `60sec 2weeks` (order doesn't matter)
 
-See [the grammar](https://github.com/seanbreckenridge/evry/blob/f158ecb3632930d2b71d597bdfbd6a6e7ee16104/src/time.pest#L5-L11) for all possible abbreviations.
+See [the grammar](https://github.com/seanbreckenridge/evry/blob/5a98d5607654c90a43eb02ee3304d3bcae1a9a3a/src/time.pest#L5-L11) for all possible abbreviations.
+
+### Examples
+
+This could be used to do anything you might use anacron for. For example, to periodically sync files:
+
+```bash
+evry 1d -backup && rsync ...
+```
+
+Or, cache the output of a command, once a day (e.g. my [`jumplist`](https://github.com/seanbreckenridge/dotfiles/blob/baf92d5fed00b87167b509f22d439c5e2075f63b/.local/scripts/generic/jumplist))
+
+```bash
+
+expensive_command_cached() {
+	evry 1d -expensive_command_cached && cmd >~/.cache/cmd_output
+	cat ~/.cache/cmd_output
+}
+
+expensive_command_cached
+```
+
+I have certain jobs (e.g. scraping websites for metadata, using [`selenium`](https://www.selenium.dev/) to [login to some website and click a button](https://github.com/seanbreckenridge/pythonanywhere-3-months), or [checking my music for metadata](https://github.com/seanbreckenridge/plaintext_playlist_py) that I want to run periodically.
+
+Putting all my jobs I want to run periodically in one [`housekeeping`](https://github.com/seanbreckenridge/dotfiles/blob/master/.local/scripts/linux/housekeeping) script I run daily/weekly gives me the ability to monitor the output easily, but also allows me the flexibility of being able to schedule tasks to run at different rates. It also means that those scripts/commands can prompt me for input/confirmation, since this is run manually from a terminal, not in the background like cron.
 
 ### Advanced Usage
 
@@ -167,13 +191,3 @@ For reference, typical JSON output when `evry` fails (command doesn't run):
   }
 ]
 ```
-
-### How I use this
-
-I have certain jobs (e.g. scraping websites for metadata, using [selenium](https://www.selenium.dev/) to [login to some website and click a button](https://github.com/seanbreckenridge/pythonanywhere-3-months), updating specific packages (e.g. [running `brew cask upgrade --greedy` on mac](https://github.com/seanbreckenridge/dotfiles/blob/e11aea908ec4f2dd111143ebfe5d6a4eb07e268c/.config/zsh/functions/update#L11))) that I want to run periodically.
-
-Putting all my jobs I want to run periodically in one [housekeeping](https://sean.fish/d/housekeeping?dark) script I run daily/weekly gives me the ability to monitor the output easily, but also allows me the flexibility of being able to schedule tasks to run at different rates. It also means that those scripts/commands can prompt me for input/confirmation, since this is run manually from a terminal, not in the background like cron.
-
-This also means that all my 'cron-like' jobs are just bash scripts, and can be checked into version control easily.
-
-I also have a [background loop script](https://github.com/seanbreckenridge/bgproc) that uses this to run tasks periodically, which I prefer to cron on my main machine. For examples of usage of `evry` there, you can look [here](https://github.com/seanbreckenridge/dotfiles/tree/master/.local/scripts/supervisor)
