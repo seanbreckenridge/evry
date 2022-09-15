@@ -116,10 +116,10 @@ If you wanted to 'reset' a task, you could do: `rm ~/.local/share/evry/data/<tag
 
 ```bash
 job-reset() {
-	local EVRY_DATA_DIR CHOSEN_TAG
-	EVRY_DATA_DIR="$(dirname "$(evry location - 2>/dev/null)")"
+	local EVRY_DATA_DIR
+	EVRY_DATA_DIR="$(evry location - 2>/dev/null)"
 	cd "${EVRY_DATA_DIR}"
-	fzf -m | while read -r tag; do
+	fzf -q "$*" -m | while read -r tag; do
 		rm -v "${tag}"
 	done
 	cd -
