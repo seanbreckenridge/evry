@@ -112,7 +112,7 @@ log:60 days (5184000000ms) haven't elapsed since last run, exiting with code 1
 log:Will next be able to run in '46 days, 16 hours, 46 minutes, 6 seconds' (4034766587ms)
 ```
 
-If you wanted to 'reset' a task, you could do: `rm ~/.local/share/evry/data/<tag name>`; removing the tag file. The next time that `evry` runs, it'll assume its a new task, and exit successfully. I use the following shell function to 'reset' tasks:
+If you wanted to 'reset' a task, you could do: `rm ~/.local/share/evry/data/<tag name>`; removing the tag file. The next time that `evry` runs, it'll assume its a new task, and exit successfully. I use the following shell function (see [`functions.sh`](./functions.sh)) to 'reset' tasks:
 
 ```bash
 job-reset() {
