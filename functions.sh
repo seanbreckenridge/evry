@@ -7,6 +7,10 @@ job-reset() {
 		echo -e "$tags" | while read -r tag; do
 			command rm -v "${tag}"
 		done
+	else
+		# user didnt select something with fzf, cd back to dir and fail
+		cd - || return $?
+		return 1
 	fi
 	cd - || return
 }
