@@ -9,7 +9,7 @@ job-reset() {
 		done
 	else
 		# user didnt select something with fzf, cd back to dir and fail
-		cd - || return $?
+		cd - >/dev/null || return $?
 		return 1
 	fi
 	cd - || return
