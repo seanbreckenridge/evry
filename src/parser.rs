@@ -17,14 +17,13 @@
 // for pest macros
 #![allow(clippy::upper_case_acronyms)]
 
+use anyhow::{self, Result};
 use pest::Parser;
 
 /// The pest.rs Parser
 #[derive(Parser)]
 #[grammar = "time.pest"] // relative to src
 pub struct TimeParser;
-
-use std::error::Error;
 
 #[doc(hidden)]
 const YEAR_MILLIS: u128 = 31556952000;
@@ -44,7 +43,7 @@ const SECOND_MILLIS: u128 = 1000;
 /// uses macros to parse the pest.rs grammar into a duration (ms)
 ///
 /// This parses the string into milliseconds.
-pub fn parse_time(unparsed_input: &str) -> Result<u128, Box<dyn Error>> {
+pub fn parse_time(unparsed_input: &str) -> Result<u128, anyhow::Error> {
     let mut parsed_file = TimeParser::parse(Rule::file, unparsed_input)?;
 
     let mut total_millis: u128 = 0;

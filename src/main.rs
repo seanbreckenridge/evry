@@ -34,6 +34,7 @@
 use std::env;
 use std::process::exit;
 
+use anyhow::{Context, Error, Result};
 extern crate pest;
 #[macro_use]
 extern crate pest_derive;
@@ -90,16 +91,20 @@ location prints the computed tag file location
 
 See https://github.com/seanbreckenridge/evry for more examples."
         );
-        exit(10)
+        exit(0);
     }
 
     /// parses command-line user input/environment variables
-    fn parse_args(dir_info: &file::LocalDir) -> Self {
+    fn parse_args(dir_info: &file::LocalDir) -> Result<Self, Error> {
         // get arguments (remove binary name)
         let args: Vec<String> = env::args().skip(1).collect();
-        let args_len = args.len();
         // if user asked for help
-        if args_len >= 1 && (args[0] == "help" || args[0] == "--help") {
+        if args
+            .iter()
+            .filter(|&arg| arg == "help" || arg == "--help")
+            .count()
+            > 0
+        {
             Args::help(false)
         }
         // split args arguments into tag/other strings
@@ -115,13 +120,13 @@ See https://github.com/seanbreckenridge/evry for more examples."
             .chars()
             .next()
             .map(|c| &tag_raw[c.len_utf8()..])
-            .expect("Error: Couldn't parse tag from arguments");
+            .context("Error: Couldn't parse tag from arguments")?;
         if tag.chars().count() == 0 {
             eprintln!("Error: passed tag was an empty string");
         }
         let first_arg = &other_vec[0];
         let json = env::var("EVRY_JSON").is_ok();
-        Args {
+        Ok(Args {
             raw_date: other_vec.join(" "),
             // specifying EVRY_JSON automatically enables debug as well
             // otherwise evry is supposed to remain silent -- its not meant to print anything
@@ -129,19 +134,19 @@ See https://github.com/seanbreckenridge/evry for more examples."
             json,
             location: first_arg == "location",
             tag: file::Tag::new(tag.to_string(), dir_info),
-        }
+        })
     }
 }
 
 /// encapsulates the logic for evry, printing logs to the printer
 /// if debug is enabled.
 /// Returns an exit code to signify what to do
-fn evry(dir_info: file::LocalDir, cli: Args, printer: &mut printer::Printer) -> i32 {
+fn evry(dir_info: file::LocalDir, cli: Args, printer: &mut printer::Printer) -> Result<i32, Error> {
     if cli.debug {
         printer.echo("tag_name", &cli.tag.name);
-        let mut d = dir_info.root_dir;
-        d.push("data");
-        printer.echo("data_directory", &d.into_os_string().into_string().unwrap());
+
+        let dir_path: String = dir_info.data_dir.into_os_string().into_string().unwrap();
+        printer.echo("data_directory", &dir_path);
     }
 
     if cli.location {
@@ -149,7 +154,7 @@ fn evry(dir_info: file::LocalDir, cli: Args, printer: &mut printer::Printer) -> 
         // user is probably trying to use this to compute the location like
         // SHELLVAR="$(evry location -tagname)"
         println!("{}", cli.tag.path);
-        return 0;
+        return Ok(0);
     }
 
     // parse duration string
@@ -161,12 +166,12 @@ fn evry(dir_info: file::LocalDir, cli: Args, printer: &mut printer::Printer) -> 
                 &format!("couldn't parse '{}' into a duration", cli.raw_date),
             );
             // eprintln!("{:?}", _e);
-            return 1; // signify fatal error
+            return Ok(1); // fatal error
         }
     };
 
     // get current time
-    let now = utils::epoch_millis();
+    let now = utils::epoch_millis().context("Couldn't get current time")?;
 
     if cli.debug {
         printer.echo(
@@ -192,19 +197,19 @@ fn evry(dir_info: file::LocalDir, cli: Args, printer: &mut printer::Printer) -> 
                 "Tag file doesn't exist, creating and exiting with code 0",
             );
         }
-        cli.tag.write(now);
-        return 0;
+        cli.tag.write(now)?;
+        return Ok(0);
     } else {
         // file exists, read last time this tag was run
-        let last_ran_at = cli.tag.read_epoch_millis();
+        let last_ran_at = cli.tag.read_epoch_millis()?;
         if now - last_ran_at > run_every {
             // duration this should be run at has elapsed, run
             if cli.debug {
                 printer.echo("log", &format!("Has been more than '{}' ({}ms) since last succeeded, writing to tag file, exiting with code 0", utils::describe_ms(run_every), run_every));
             }
             // save current time to tag file
-            cli.tag.write(now);
-            return 0;
+            cli.tag.write(now)?;
+            return Ok(0);
         } else {
             // this has been run within the specified duration, don't run
             if cli.debug {
@@ -234,15 +239,15 @@ fn evry(dir_info: file::LocalDir, cli: Args, printer: &mut printer::Printer) -> 
                     Some(printer::PrinterType::Json),
                 );
             }
-            return 2; // exit code 2; expected error, to cause next shell command to not run
+            return Ok(2); // exit code 2; expected error, to cause next shell command to not run
         }
     }
 }
 
-fn main() {
+fn main() -> Result<(), Error> {
     // global application information
-    let dir_info = file::LocalDir::new();
-    let cli = Args::parse_args(&dir_info);
+    let dir_info = file::LocalDir::new()?;
+    let cli = Args::parse_args(&dir_info)?;
 
     let printer_type = if cli.json {
         printer::PrinterType::Json
@@ -254,7 +259,7 @@ fn main() {
     let mut printer = printer::Printer::new(printer_type);
 
     // run 'main' code, saving exit code
-    let result = evry(dir_info, cli, &mut printer);
+    let result = evry(dir_info, cli, &mut printer)?;
 
     // if user specified JSON, print the blob
     printer.flush();

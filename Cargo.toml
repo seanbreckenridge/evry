@@ -19,6 +19,7 @@ categories = [
 exclude = ["test"]
 
 [dependencies]
+anyhow = "1.0.69"
 app_dirs = "^1.2.1"
 pest = "2.0"
 pest_derive = "2.0"

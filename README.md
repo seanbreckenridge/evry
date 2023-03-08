@@ -45,7 +45,11 @@ done
 
 ... and even though that tries to run the command every 60 seconds, `evry` exits with an unsuccessful exit code, so `run command` would only get run once per month.
 
-The `-runcommand` is just an arbitrary tag name so that `evry` can save metadata about a command to run/job. It can be chosen arbitrarily, its only use is to uniquely identify some task, and save a metadata file to your [local data directory](https://docs.rs/app_dirs/1.2.1/app_dirs/).
+The `-runcommand` is just an arbitrary tag name so that `evry` can save metadata about a command to run/job. It can be chosen arbitrarily, its only use is to uniquely identify some task, and save a metadata file to your [local data directory](https://docs.rs/app_dirs/1.2.1/app_dirs/). If you want to overwrite the default location, you can set the `EVRY_DIR` variable. E.g., in your shell profile:
+
+```bash
+export EVRY_DIR="$HOME/.local/share/tags"
+```
 
 Since this doesn't run in a larger context and `evry` can't know if a command failed to run - if a command fails, you can remove the tag file, to reset it to run again later (since if the file doesn't exist, `evry` assumes its a new task):
 

@@ -1,12 +1,11 @@
 //! helper functions to deal with/describe time
+use anyhow::{Error, Result};
 use std::time::SystemTime;
 
 /// gets the current time as milliseconds
-pub fn epoch_millis() -> u128 {
-    SystemTime::now()
-        .duration_since(SystemTime::UNIX_EPOCH)
-        .expect("error getting unix timestamp")
-        .as_millis()
+pub fn epoch_millis() -> Result<u128, Error> {
+    let now = SystemTime::now().duration_since(SystemTime::UNIX_EPOCH)?;
+    Ok(now.as_millis())
 }
 
 // helper method; if the value (time) is not 0, append to the string buffer
