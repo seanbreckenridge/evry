@@ -91,7 +91,14 @@ location prints the computed tag file location
 
 See https://github.com/seanbreckenridge/evry for more examples."
         );
-        exit(0);
+        if warn {
+            // exit with an unsuccessful exit code so if user is doing some complex argparsing
+            // in a bash script, and this fails to parse the arguments,
+            // this fails and doesnt run the dependent command accidentally
+            exit(10);
+        } else {
+            exit(0);
+        }
     }
 
     /// parses command-line user input/environment variables
