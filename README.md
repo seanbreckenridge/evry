@@ -2,6 +2,12 @@
 
 A shell-script-centric task scheduler; uses exit codes to determine control flow. Most of the time I call this behind [bgproc](https://github.com/seanbreckenridge/bgproc).
 
+- [Install](#install)
+- [Rationale](#rationale)
+- [Duration Examples](#duration)
+- [Examples](#examples)
+- [Advanced Usage](#advanced-usage)
+
 ### Install
 
 Install `rust`/`cargo`, then:
@@ -103,7 +109,7 @@ I have certain jobs (e.g. scraping websites for metadata, using [`selenium`](htt
 
 Putting all my jobs I want to run periodically in one [`housekeeping`](https://github.com/seanbreckenridge/dotfiles/blob/master/.local/scripts/linux/housekeeping) script I run daily/weekly gives me the ability to monitor the output easily, but also allows me the flexibility of being able to schedule tasks to run at different rates. It also means that those scripts/commands can prompt me for input/confirmation, since this is run manually from a terminal, not in the background like cron.
 
-I often use this instead of cron when developing websites, e.g. [here](https://github.com/seanbreckenridge/dbsentinel/blob/32b81d09b201a92f7308ceda0b4323eff52b7df5/update_data#L97-L115), where I use it to periodically run caching tasks for a webservice. Having them in a script like this means its the same interface/environment while I'm developing and deploying, so theres no issues with possibly missing environment variables/being in the wrong directory when deploying to production
+I often use this instead of cron when developing websites, e.g. [here](https://github.com/seanbreckenridge/dbsentinel/blob/32b81d09b201a92f7308ceda0b4323eff52b7df5/update_data#L97-L115), where I use it to periodically run caching tasks for a webservice. Having them in a script like this means its the same interface/environment while I'm developing and deploying, so theres no issues with possibly missing environment variables/being in the wrong directory when deploying to production, and its easy to 'reset' a cron job while I'm developing
 
 ### Advanced Usage
 
