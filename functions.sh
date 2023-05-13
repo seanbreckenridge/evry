@@ -1,7 +1,7 @@
 # reset a job (remove the tag file) for an evry job
 job-reset() {
 	local data_dir tags
-	if [[ -z "$0" ]]; then
+	if [[ -z "$1" ]]; then
 		data_dir="$(evry location - 2>/dev/null)"
 		cd "${data_dir}" || return $?
 		if tags="$(fzf -q "$*" -m)"; then
