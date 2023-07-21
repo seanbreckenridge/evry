@@ -1,7 +1,7 @@
 # reset a job (remove the tag file) for an evry job
 job-reset() {
 	local data_dir tags
-	if [[ -z "$1" ]]; then
+	if [[ -z "$1" ]] || [[ -n "$JOB_RESET_USE_FZF" ]]; then
 		data_dir="$(evry location - 2>/dev/null)"
 		cd "${data_dir}" || return $?
 		if tags="$(fzf -q "$*" -m)"; then
@@ -20,7 +20,7 @@ job-reset() {
 			command rm -v "${tag}"
 		else
 			echo "No such tag file: ${tag}" >&2
-			return 1
+			JOB_RESET_USE_FZF=1 job-reset "$1" || return $?
 		fi
 	fi
 }
