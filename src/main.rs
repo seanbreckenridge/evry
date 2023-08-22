@@ -32,6 +32,7 @@
 //! Since this doesn't run in a larger context and its just a bash script, if a command fails, you can remove the tag file, to reset it to run again later (since if the file doesn't exist, `evry` assumes its a new task)
 
 use std::env;
+use std::io::Write;
 use std::process::exit;
 
 use anyhow::{Context, Error, Result};
@@ -172,7 +173,20 @@ fn evry(dir_info: file::LocalDir, cli: Args, printer: &mut printer::Printer) -> 
                 "error",
                 &format!("couldn't parse '{}' into a duration", cli.raw_date),
             );
-            // eprintln!("{:?}", _e);
+            if let Ok(evry_parse_logfile) = env::var("EVRY_PARSE_ERROR_LOG") {
+                // write cli args to logfile, with other CLI args
+                let mut logfile = std::fs::OpenOptions::new()
+                    .create(true)
+                    .append(true)
+                    .open(evry_parse_logfile)
+                    .context("Couldn't open EVRY_PARSE_ERROR_LOG")?;
+                writeln!(
+                    logfile,
+                    "Could not parse: {} -{}",
+                    cli.raw_date, cli.tag.name
+                )
+                .context("Couldn't write to logfile")?;
+            }
             return Ok(1); // fatal error
         }
     };
