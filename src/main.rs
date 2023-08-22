@@ -174,7 +174,6 @@ fn evry(dir_info: file::LocalDir, cli: Args, printer: &mut printer::Printer) -> 
                 &format!("couldn't parse '{}' into a duration", cli.raw_date),
             );
             if let Ok(evry_parse_logfile) = env::var("EVRY_PARSE_ERROR_LOG") {
-                // write cli args to logfile, with other CLI args
                 let mut logfile = std::fs::OpenOptions::new()
                     .create(true)
                     .append(true)
