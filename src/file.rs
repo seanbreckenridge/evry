@@ -50,8 +50,8 @@ pub fn read_epoch_millis(filepath: &str) -> Result<u128, Error> {
     let millis_str =
         read_to_string(filepath).context("Could not read tag information from file")?;
     millis_str.trim().parse::<u128>().context(format!(
-        "Could not convert tag contents '{}' to integer",
-        millis_str
+        "Could not convert tag file contents '{}' to integer for tag '{}'",
+        millis_str, filepath
     ))
 }
 
