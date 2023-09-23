@@ -101,7 +101,7 @@ mod tests {
         );
         // shouldn't accept, since this is a Json printer
         p.print(
-            Message::new("status", "this shouldnt be in the output"),
+            Message::new("status", "this shouldn't be in the output"),
             Some(PrinterType::Stderr),
         );
         assert_eq!(p.serialize(), "[{\"type\":\"data dir\",\"body\":\"~/.local/share/evry/data\"},{\"type\":\"tag name\",\"body\":\"this is tag name\"},{\"type\":\"status\",\"body\":\"something bad happened\"}]");

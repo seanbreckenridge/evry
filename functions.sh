@@ -9,7 +9,7 @@ job-reset() {
 				command rm -v "${tag}"
 			done
 		else
-			# user didnt select something with fzf, cd back to dir and fail
+			# user didn't select something with fzf, cd back to dir and fail
 			cd - >/dev/null || return $?
 			return 1
 		fi

@@ -14,7 +14,7 @@ second = { "second" | "sec" | "s" }
 // month must appear before minute since minute
 // will consume the token before month has a chance to
 singular = { (month | day | hour | minute | week | second | year) }
-// @ means atomic rule, doesnt apply WHITESPACE
+// @ means atomic rule, doesn't apply WHITESPACE
 plural = @{ singular ~ "s" }
 
 // one duration

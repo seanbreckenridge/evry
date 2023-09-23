@@ -95,7 +95,7 @@ See https://github.com/seanbreckenridge/evry for more examples."
         if warn {
             // exit with an unsuccessful exit code so if user is doing some complex argparsing
             // in a bash script, and this fails to parse the arguments,
-            // this fails and doesnt run the dependent command accidentally
+            // this fails and doesn't run the dependent command accidentally
             exit(10);
         } else {
             exit(0);
@@ -275,7 +275,7 @@ fn main() -> Result<(), Error> {
         printer::PrinterType::Stderr
     };
 
-    // handles printing/saving messages incase we're in JSON mode
+    // handles printing/saving messages in case we're in JSON mode
     let mut printer = printer::Printer::new(printer_type);
 
     // run 'main' code, saving exit code
