@@ -25,7 +25,7 @@ Uses shell exit codes to determine control flow in shell scripts
 Usage:
   evry <describe duration>... <-tagname>
   evry location <-tagname>
-  evry duration <some duration string...>
+  evry duration <describe duration...>
   evry help
 ```
 
