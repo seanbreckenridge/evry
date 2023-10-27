@@ -34,6 +34,7 @@
 use std::env;
 use std::io::Write;
 use std::process::exit;
+use std::string::String;
 
 use anyhow::{Context, Error, Result};
 extern crate pest;
@@ -45,6 +46,13 @@ mod parser;
 mod printer;
 mod utils;
 
+#[derive(Debug)]
+enum Command {
+    Location,
+    Duration,
+    Run,
+}
+
 /// parses the user input; flags/environment variables
 #[derive(Debug)]
 struct Args {
@@ -54,18 +62,15 @@ struct Args {
     debug: bool,
     /// if EVRY_JSON=1 was set
     json: bool,
-    /// if the user asked to print the computed tag location instead of running
-    location: bool,
+    // if the user wants to print location/duration instead of running normally
+    command: Command,
     /// tagfile to read/write from, uniquely identifies this job
     tag: file::Tag,
 }
 
 impl Args {
     /// prints the help message
-    fn help(warn: bool) {
-        if warn {
-            println!("Not enough arguments provided.");
-        }
+    fn help() {
         println!(
             "A tool to manually run commands -- periodically.
 Uses shell exit codes to determine control flow in shell scripts
@@ -73,6 +78,7 @@ Uses shell exit codes to determine control flow in shell scripts
 Usage:
   evry [describe duration]... <-tagname>
   evry location <-tagname>
+  evry duration some duration string
   evry help
 
 Best explained with an example:
@@ -90,16 +96,15 @@ is run again with that tag, it can compare the current time against that file.
 
 location prints the computed tag file location
 
+duration just lets you use this as a duration parser, without interacting with the filesystem
+it prints the parsed duration in seconds. Running with JSON mode prints more formats
+
 See https://github.com/seanbreckenridge/evry for more examples."
         );
-        if warn {
-            // exit with an unsuccessful exit code so if user is doing some complex argparsing
-            // in a bash script, and this fails to parse the arguments,
-            // this fails and doesn't run the dependent command accidentally
-            exit(10);
-        } else {
-            exit(0);
-        }
+        // exit with an unsuccessful exit code so if user is doing some complex argparsing
+        // in a bash script, and this fails to parse the arguments,
+        // this fails and doesn't run the dependent command accidentally
+        exit(10);
     }
 
     /// parses command-line user input/environment variables
@@ -113,34 +118,56 @@ See https://github.com/seanbreckenridge/evry for more examples."
             .count()
             > 0
         {
-            Args::help(false)
+            Args::help()
         }
         // split args arguments into tag/other strings
         let (tag_vec, other_vec): (_, Vec<_>) =
             args.into_iter().partition(|arg| arg.starts_with('-'));
-        // user didn't provide argument
-        if tag_vec.is_empty() || other_vec.is_empty() {
-            Args::help(true)
-        }
-        // parse tag, remove the '-' from the name
-        let tag_raw = &tag_vec[0];
-        let tag = tag_raw
-            .chars()
-            .next()
-            .map(|c| &tag_raw[c.len_utf8()..])
-            .context("Error: Couldn't parse tag from arguments")?;
-        if tag.chars().count() == 0 {
-            eprintln!("Error: passed tag was an empty string");
+        if other_vec.is_empty() {
+            eprintln!("Error: Must provide a duration string or a command\n");
+            Args::help()
         }
         let first_arg = &other_vec[0];
+        let command: Command = match first_arg.as_str() {
+            "location" => Command::Location,
+            "duration" => Command::Duration,
+            _ => Command::Run,
+        };
+        let date_string = match command {
+            Command::Location | Command::Duration => other_vec[1..].join(" "),
+            _ => other_vec.join(" "),
+        };
+        if tag_vec.is_empty() && !matches!(command, Command::Duration) {
+            eprintln!("Error: Must provide a tag name using a hyphen or a command\n");
+            Args::help()
+        }
+        // parse tag, remove the first character ('-') from the tag
+        let tag: String = tag_vec
+            .iter()
+            .map(|arg| arg.chars().skip(1).collect::<String>())
+            .collect::<Vec<String>>()
+            .join("_");
+        // if user didnt ask for duration, they have to provide a tag
+        if tag.chars().count() == 0 && first_arg != "duration" {
+            eprintln!("Error: passed tag was an empty string\n");
+        }
+        match command {
+            Command::Location => (),
+            _ => {
+                if date_string.chars().count() == 0 {
+                    eprintln!("Error: passed duration was an empty string");
+                    Args::help()
+                }
+            }
+        }
         let json = env::var("EVRY_JSON").is_ok();
         Ok(Args {
-            raw_date: other_vec.join(" "),
+            command,
+            raw_date: date_string,
             // specifying EVRY_JSON automatically enables debug as well
             // otherwise evry is supposed to remain silent -- its not meant to print anything
             debug: json | env::var("EVRY_DEBUG").is_ok(),
             json,
-            location: first_arg == "location",
             tag: file::Tag::new(tag.to_string(), dir_info),
         })
     }
@@ -157,7 +184,7 @@ fn evry(dir_info: file::LocalDir, cli: Args, printer: &mut printer::Printer) -> 
         printer.echo("data_directory", &dir_path);
     }
 
-    if cli.location {
+    if matches!(cli.command, Command::Location) {
         // causes an early exit, print directly instead of using the printer
         // user is probably trying to use this to compute the location like
         // SHELLVAR="$(evry location -tagname)"
@@ -189,6 +216,26 @@ fn evry(dir_info: file::LocalDir, cli: Args, printer: &mut printer::Printer) -> 
             return Ok(1); // fatal error
         }
     };
+
+    if matches!(cli.command, Command::Duration) {
+        if !cli.debug {
+            println!("{}", run_every / 1000);
+        } else {
+            printer.print(
+                printer::Message::new("duration", &format!("{}", run_every)),
+                Some(printer::PrinterType::Json),
+            );
+            printer.print(
+                printer::Message::new("duration_seconds", &format!("{}", run_every / 1000)),
+                Some(printer::PrinterType::Json),
+            );
+            printer.print(
+                printer::Message::new("duration_pretty", &utils::describe_ms(run_every)),
+                Some(printer::PrinterType::Json),
+            );
+        }
+        return Ok(0);
+    }
 
     // get current time
     let now = utils::epoch_millis().context("Couldn't get current time")?;
