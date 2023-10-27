@@ -23,8 +23,9 @@ A tool to manually run commands -- periodically.
 Uses shell exit codes to determine control flow in shell scripts
 
 Usage:
-  evry [describe duration]... <-tagname>
+  evry <describe duration>... <-tagname>
   evry location <-tagname>
+  evry duration <some duration string...>
   evry help
 ```
 
@@ -84,6 +85,19 @@ The duration (e.g. `evry 2 months, 5 days`) is parsed with a [`PEG`](https://en.
 - `60sec 2weeks` (order doesn't matter)
 
 See [the grammar](https://github.com/seanbreckenridge/evry/blob/5a98d5607654c90a43eb02ee3304d3bcae1a9a3a/src/time.pest#L5-L11) for all possible abbreviations.
+
+This also includes a utility `duration` command to print a parsed duration in seconds:
+
+```
+$ evry duration 5m
+300
+$ evry duration 5 minutes
+300
+$ evry duration 10 days
+864000
+```
+
+Can run with `EVRY_JSON=1` to print JSON with more formats.
 
 ### Examples
 

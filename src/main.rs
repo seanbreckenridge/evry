@@ -76,9 +76,9 @@ impl Args {
 Uses shell exit codes to determine control flow in shell scripts
 
 Usage:
-  evry [describe duration]... <-tagname>
+  evry <describe duration>... <-tagname>
   evry location <-tagname>
-  evry duration some duration string
+  evry duration <some duration string...>
   evry help
 
 Best explained with an example:
@@ -221,18 +221,9 @@ fn evry(dir_info: file::LocalDir, cli: Args, printer: &mut printer::Printer) -> 
         if !cli.debug {
             println!("{}", run_every / 1000);
         } else {
-            printer.print(
-                printer::Message::new("duration", &format!("{}", run_every)),
-                Some(printer::PrinterType::Json),
-            );
-            printer.print(
-                printer::Message::new("duration_seconds", &format!("{}", run_every / 1000)),
-                Some(printer::PrinterType::Json),
-            );
-            printer.print(
-                printer::Message::new("duration_pretty", &utils::describe_ms(run_every)),
-                Some(printer::PrinterType::Json),
-            );
+            printer.echo("duration", &format!("{}", run_every));
+            printer.echo("duration_seconds", &format!("{}", run_every / 1000));
+            printer.echo("duration_pretty", &utils::describe_ms(run_every));
         }
         return Ok(0);
     }
