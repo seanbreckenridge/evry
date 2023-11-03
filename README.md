@@ -223,3 +223,26 @@ For reference, typical JSON output when `evry` fails (command doesn't run):
   }
 ]
 ```
+
+If you want to extract multiple values from the output which have distinct keys (e.g. `till_next_pretty`, `till_next` and `tag_name`), you might find this snippet useful:
+
+```bash
+$ EVRY_JSON=1 evry 12 hours -bleanser-zsh | jq '[.[] | {key: .type, value: .body}] | from_entries'
+{
+  "tag_name": "bleanser-zsh",
+  "data_directory": "/home/sean/.local/share/evry/data",
+  "log": "Tag file doesn't exist, creating and exiting with code 0",
+  "duration": "43200000",
+  "duration_pretty": "12 hours"
+}
+```
+
+You could then use `jq` to extract the `duration`/`duration_pretty`/`tag_name` values from that output, like:
+
+```bash
+$ OUT="$(EVRY_JSON=1 evry 12 hours -bleanser-zsh | jq '[.[] | {key: .type, value: .body}] | from_entries')"
+$ echo "$OUT" | jq -r '.duration'
+43200000
+$ echo "$OUT" | jq -r '.duration_pretty'
+12 hours
+```
